@@ -13,31 +13,11 @@ class ValidateDriverLicenceIntegrationTest extends KernelTestCase
 
     /**
      * @test
-     * @dataProvider invalidLicenseNumberDataProvider
      */
-    public function cannotCreateActiveDriverWithInvalidLicenseNumber(string $invalidLicenseNumber): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Illegal license no = '.$invalidLicenseNumber);
-
-        $this->sut->createDriver(
-            $invalidLicenseNumber,
-            'Snow',
-            'John',
-            'regular',
-            'active',
-            null,
-        );
-    }
-
-    /**
-     * @test
-     * @dataProvider invalidLicenseNumberDataProvider
-     */
-    public function canCreateInactiveDriverWithInvalidLicenseNumber(string $invalidLicenseNumber): void
+    public function canCreateActiveDriverWithValidLicenseNumber(): void
     {
         $createdDriver = $this->sut->createDriver(
-            $invalidLicenseNumber,
+            'FARME100165AB5EW',
             'Snow',
             'John',
             'regular',
@@ -47,17 +27,16 @@ class ValidateDriverLicenceIntegrationTest extends KernelTestCase
 
         $loadedDriver = $this->sut->load($createdDriver->getId());
 
-        self::assertSame($invalidLicenseNumber, $loadedDriver->getDriverLicense());
+        self::assertSame('FARME100165AB5EW', $loadedDriver->getDriverLicense());
     }
 
     /**
      * @test
-     * @dataProvider invalidLicenseNumberDataProvider
      */
-    public function cannotChangeLicenseNumberToInvalidOne(string $invalidLicenseNumber): void
+    public function canChangeLicenseNumberToValidOne(): void
     {
         $createdDriver = $this->sut->createDriver(
-            'AAAAA123456AA0AA',
+            'FARME100165AB5EW',
             'Snow',
             'John',
             'regular',
@@ -65,20 +44,17 @@ class ValidateDriverLicenceIntegrationTest extends KernelTestCase
             null,
         );
 
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Illegal license no = '.$invalidLicenseNumber);
+        $this->sut->changeLicenseNumber('99999740614992TL', $createdDriver->getId());
 
-        $this->sut->changeLicenseNumber($invalidLicenseNumber, $createdDriver->getId());
+        $loadedDriver = $this->sut->load($createdDriver->getId());
+
+        self::assertSame('99999740614992TL', $loadedDriver->getDriverLicense());
     }
 
-    /**
-     * @test
-     * @dataProvider invalidLicenseNumberDataProvider
-     */
-    public function cannotChangeDriverStatusIfItsLicenseIsInvalid(string $invalidLicenseNumber): void
+    public function canChangeDriverStatusToActiveIfItsLicenseIsValid(): void
     {
         $createdDriver = $this->sut->createDriver(
-            $invalidLicenseNumber,
+            'FARME100165AB5EW',
             'Snow',
             'John',
             'regular',
@@ -86,10 +62,11 @@ class ValidateDriverLicenceIntegrationTest extends KernelTestCase
             null,
         );
 
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Illegal license no = '.$invalidLicenseNumber);
-
         $this->sut->changeDriverStatus($createdDriver->getId(), 'active');
+
+        $loadedDriver = $this->sut->load($createdDriver->getId());
+
+        self::assertSame('active', $loadedDriver->getStatus());
     }
 
     protected function setUp(): void
@@ -97,13 +74,5 @@ class ValidateDriverLicenceIntegrationTest extends KernelTestCase
         parent::setUp();
 
         $this->sut = $this->getContainer()->get(DriverService::class);
-    }
-
-    public function invalidLicenseNumberDataProvider(): array
-    {
-        return [
-            ['invalidLicenseNumber' => ''],
-            ['invalidLicenseNumber' => 'invalid license number'],
-        ];
     }
 }

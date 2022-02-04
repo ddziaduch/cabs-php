@@ -35,7 +35,7 @@ class Driver extends BaseEntity
     private ?string $photo = null;
 
     #[Column]
-    private string $driverLicense;
+    private DriverLicense $driverLicense;
 
     #[OneToOne(targetEntity: DriverFee::class)]
     private DriverFee $fee;
@@ -122,12 +122,12 @@ class Driver extends BaseEntity
         $this->photo = $photo;
     }
 
-    public function getDriverLicense(): string
+    public function getDriverLicense(): DriverLicense
     {
         return $this->driverLicense;
     }
 
-    public function setDriverLicense(string $driverLicense): void
+    public function setDriverLicense(DriverLicense $driverLicense): void
     {
         $this->driverLicense = $driverLicense;
     }

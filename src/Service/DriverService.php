@@ -5,6 +5,7 @@ namespace LegacyFighter\Cabs\Service;
 use LegacyFighter\Cabs\DTO\DriverDTO;
 use LegacyFighter\Cabs\Entity\Driver;
 use LegacyFighter\Cabs\Entity\DriverAttribute;
+use LegacyFighter\Cabs\Entity\DriverLicense;
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Repository\DriverAttributeRepository;
 use LegacyFighter\Cabs\Repository\DriverFeeRepository;
@@ -32,9 +33,9 @@ class DriverService
     {
         $driver = new Driver();
         if($status === Driver::STATUS_ACTIVE) {
-            if($license === '' || preg_match(self::DRIVER_LICENSE_REGEX, $license) !== 1) {
-                throw new \InvalidArgumentException('Illegal license no = '.$license);
-            }
+            $license = DriverLicense::withLicense($license);
+        } else {
+            $license = DriverLicense::withoutValidation($license);
         }
         $driver->setDriverLicense($license);
         $driver->setLastName($lastName);
@@ -57,9 +58,7 @@ class DriverService
         if($driver === null) {
             throw new \InvalidArgumentException('Driver does not exists, id = '.$driverId);
         }
-        if($newLicense === '' || preg_match(self::DRIVER_LICENSE_REGEX, $newLicense) !== 1) {
-            throw new \InvalidArgumentException('Illegal license no = '.$newLicense);
-        }
+        $newLicense = DriverLicense::withLicense($newLicense);
         if($driver->getStatus() !== Driver::STATUS_ACTIVE) {
             throw new \InvalidArgumentException('Driver is not active, cannot change license');
         }
@@ -76,10 +75,7 @@ class DriverService
             throw new \InvalidArgumentException('Driver does not exists, id = '.$driverId);
         }
         if($status === Driver::STATUS_ACTIVE) {
-            $license = $driver->getDriverLicense();
-            if($license === '' || preg_match(self::DRIVER_LICENSE_REGEX, $license) !== 1) {
-                throw new \InvalidArgumentException('Status cannot be ACTIVE. Illegal license no = '.$license);
-            }
+            DriverLicense::withLicense((string) $driver->getDriverLicense());
         }
 
 
