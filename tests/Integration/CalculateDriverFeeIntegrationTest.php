@@ -54,7 +54,7 @@ class CalculateDriverFeeIntegrationTest extends KernelTestCase
         $driver = $this->createDriver();
         $transit = $this->createTransit($driver);
 
-        $this->createDriverFee($driver, DriverFee::TYPE_PERCENTAGE, 5, 10);
+        $this->createDriverFee($driver, DriverFee::TYPE_PERCENTAGE, 5, Money::from(10));
 
         $fee = self::getContainer()->get(DriverFeeService::class)->calculateDriverFee($transit->getId());
 
@@ -81,7 +81,7 @@ class CalculateDriverFeeIntegrationTest extends KernelTestCase
         return $transit;
     }
 
-    private function createDriverFee(Driver $driver, string $type, int $amount, ?int $min = null): void
+    private function createDriverFee(Driver $driver, string $type, int $amount, ?Money $min = null): void
     {
         $driverFee = new DriverFee($type, $driver, $amount, $min);
         self::getContainer()->get(DriverFeeRepository::class)->save($driverFee);

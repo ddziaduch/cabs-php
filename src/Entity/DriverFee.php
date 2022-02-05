@@ -26,12 +26,12 @@ class DriverFee extends BaseEntity
     #[Column(type: 'money', nullable: true)]
     private ?Money $min;
 
-    public function __construct(string $type, Driver $driver, int $amount, ?int $min = null)
+    public function __construct(string $type, Driver $driver, int $amount, ?Money $min = null)
     {
         $this->type = $type;
         $this->driver = $driver;
         $this->amount = $amount;
-        $this->min = $min === null ? null : Money::from($min);
+        $this->min = $min;
     }
 
     public function getType(): string

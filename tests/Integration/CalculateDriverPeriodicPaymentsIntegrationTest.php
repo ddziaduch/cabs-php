@@ -28,7 +28,7 @@ class CalculateDriverPeriodicPaymentsIntegrationTest extends KernelTestCase
         $this->createTransit($driver, 40, new \DateTimeImmutable('2019-12-01T12:00:00Z'));
         $this->createTransit($driver, 50, new \DateTimeImmutable('2022-01-01T12:00:00Z'));
 
-        $this->createDriverFee($driver, DriverFee::TYPE_FLAT, 10, 10);
+        $this->createDriverFee($driver, DriverFee::TYPE_FLAT, 10, Money::from(10));
 
         $paymentJune = self::getContainer()->get(DriverService::class)->calculateDriverMonthlyPayment(
             $driver->getId(),
@@ -59,7 +59,7 @@ class CalculateDriverPeriodicPaymentsIntegrationTest extends KernelTestCase
         $this->createTransit($driver, 40, new \DateTimeImmutable('2019-12-01T12:00:00Z'));
         $this->createTransit($driver, 50, new \DateTimeImmutable('2022-01-01T12:00:00Z'));
 
-        $this->createDriverFee($driver, DriverFee::TYPE_FLAT, 10, 10);
+        $this->createDriverFee($driver, DriverFee::TYPE_FLAT, 10, Money::from(10));
 
         $payments = self::getContainer()->get(DriverService::class)->calculateDriverYearlyPayment(
             $driver->getId(),
@@ -100,7 +100,7 @@ class CalculateDriverPeriodicPaymentsIntegrationTest extends KernelTestCase
         return $transit;
     }
 
-    private function createDriverFee(Driver $driver, string $type, int $amount, ?int $min = null): void
+    private function createDriverFee(Driver $driver, string $type, int $amount, ?Money $min = null): void
     {
         $driverFee = new DriverFee($type, $driver, $amount, $min);
         self::getContainer()->get(DriverFeeRepository::class)->save($driverFee);
