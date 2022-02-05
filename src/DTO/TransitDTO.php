@@ -39,7 +39,9 @@ class TransitDTO implements \JsonSerializable
         $this->id = $transit->getId();
         $this->distance = $transit->getKm();
         $this->factor = $transit->getFactor();
-        $this->price = $transit->getPrice();
+        if ($transit->getPrice() !== null) {
+            $this->price = (float) $transit->getPrice()->toInt();
+        }
         $this->date = $transit->getDateTime();
         $this->status = $transit->getStatus();
         $this->setTariff($transit);
