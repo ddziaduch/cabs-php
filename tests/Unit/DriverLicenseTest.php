@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace LegacyFighter\Cabs\Tests\Unit;
 
-use LegacyFighter\Cabs\Entity\DriverLicense;
+use LegacyFighter\Cabs\VO\DriverLicense;
 use PHPUnit\Framework\TestCase;
 
 class DriverLicenseTest extends TestCase

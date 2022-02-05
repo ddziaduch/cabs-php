@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace LegacyFighter\Cabs\Entity;
+namespace LegacyFighter\Cabs\VO;
 
 use Doctrine\ORM\Mapping\Embeddable;
 

@@ -5,7 +5,7 @@ namespace LegacyFighter\Cabs\Service;
 use LegacyFighter\Cabs\DTO\DriverDTO;
 use LegacyFighter\Cabs\Entity\Driver;
 use LegacyFighter\Cabs\Entity\DriverAttribute;
-use LegacyFighter\Cabs\Entity\DriverLicense;
+use LegacyFighter\Cabs\VO\DriverLicense;
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Repository\DriverAttributeRepository;
 use LegacyFighter\Cabs\Repository\DriverFeeRepository;
