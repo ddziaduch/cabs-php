@@ -28,7 +28,7 @@ class CalculateDriverFeeIntegrationTest extends KernelTestCase
 
         $fee = self::getContainer()->get(DriverFeeService::class)->calculateDriverFee($transit->getId());
 
-        self::assertSame(90, $fee);
+        self::assertSame(90, $fee->toInt());
     }
 
     /**
@@ -43,7 +43,7 @@ class CalculateDriverFeeIntegrationTest extends KernelTestCase
 
         $fee = self::getContainer()->get(DriverFeeService::class)->calculateDriverFee($transit->getId());
 
-        self::assertSame(20, $fee);
+        self::assertSame(20, $fee->toInt());
     }
 
     /**
@@ -58,7 +58,7 @@ class CalculateDriverFeeIntegrationTest extends KernelTestCase
 
         $fee = self::getContainer()->get(DriverFeeService::class)->calculateDriverFee($transit->getId());
 
-        self::assertSame(10, $fee);
+        self::assertSame(10, $fee->toInt());
     }
 
     private function createDriver(): Driver

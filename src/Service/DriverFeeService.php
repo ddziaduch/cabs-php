@@ -18,14 +18,14 @@ class DriverFeeService
         $this->transitRepository = $transitRepository;
     }
 
-    public function calculateDriverFee(int $transitId): int
+    public function calculateDriverFee(int $transitId): Money
     {
         $transit = $this->transitRepository->getOne($transitId);
         if($transit === null) {
             throw new \InvalidArgumentException('transit does not exist, id = '.$transitId);
         }
         if($transit->getDriversFee() !== null) {
-            return $transit->getDriversFee()->toInt();
+            return $transit->getDriversFee();
         }
         $transitPrice = $transit->getPrice();
         $driverFee = $this->driverFeeRepository->findByDriver($transit->getDriver());
@@ -38,6 +38,6 @@ class DriverFeeService
             $finalFee = $transitPrice->percentage($driverFee->getAmount());
         }
 
-        return max($finalFee->toInt(), $driverFee->getMin() === null ? 0 : $driverFee->getMin()->toInt());
+        return $driverFee->getMin() === null ? $finalFee : $finalFee->max($driverFee->getMin());
     }
 }

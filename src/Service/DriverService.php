@@ -112,7 +112,7 @@ class DriverService
         $transitsList = $this->transitRepository->findAllByDriverAndDateTimeBetween($driver, $from, $to);
         $sum = array_sum(
             array_map(
-                fn(Transit $transit) => $this->driverFeeService->calculateDriverFee($transit->getId()),
+                fn(Transit $transit) => $this->driverFeeService->calculateDriverFee($transit->getId())->toInt(),
                 $transitsList
             )
         );
