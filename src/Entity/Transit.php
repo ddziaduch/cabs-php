@@ -101,8 +101,8 @@ class Transit extends BaseEntity
     #[Column(type: 'money', nullable: true)]
     private ?Money $price = null;
 
-    #[Column(type: 'integer', nullable: true)]
-    private ?int $estimatedPrice = null;
+    #[Column(type: 'money', nullable: true)]
+    private ?Money $estimatedPrice = null;
 
     #[Column(type: 'integer', nullable: true)]
     private ?int $driversFee = null;
@@ -305,7 +305,7 @@ class Transit extends BaseEntity
 
     public function setEstimatedPrice(?int $estimatedPrice): void
     {
-        $this->estimatedPrice = $estimatedPrice;
+        $this->estimatedPrice = Money::from($estimatedPrice);
     }
 
     public function getDriversFee(): ?int
@@ -355,10 +355,10 @@ class Transit extends BaseEntity
         }
 
         $estimated = $this->calculateCost();
-        $this->estimatedPrice = $estimated->toInt();
+        $this->estimatedPrice = $estimated;
         $this->price = null;
 
-        return $this->estimatedPrice;
+        return $this->estimatedPrice->toInt();
     }
 
     public function calculateFinalCosts(): int
