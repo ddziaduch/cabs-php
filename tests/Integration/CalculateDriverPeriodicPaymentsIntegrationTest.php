@@ -10,6 +10,7 @@ use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Repository\DriverFeeRepository;
 use LegacyFighter\Cabs\Repository\TransitRepository;
 use LegacyFighter\Cabs\Service\DriverService;
+use LegacyFighter\Cabs\VO\Money;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class CalculateDriverPeriodicPaymentsIntegrationTest extends KernelTestCase
@@ -90,7 +91,7 @@ class CalculateDriverPeriodicPaymentsIntegrationTest extends KernelTestCase
     {
         $transit = new Transit();
         $transit->setStatus('draft');
-        $transit->setPrice($price);
+        $transit->setPrice(Money::from($price));
         $transit->setDriver($driver);
         $transit->setDateTime($dateTime);
 

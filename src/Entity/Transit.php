@@ -293,9 +293,9 @@ class Transit extends BaseEntity
     }
 
     //just for testing
-    public function setPrice(?int $price): void
+    public function setPrice(?Money $price): void
     {
-        $this->price = Money::from($price);
+        $this->price = $price;
     }
 
     public function getEstimatedPrice(): ?int
