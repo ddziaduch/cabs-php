@@ -104,8 +104,8 @@ class Transit extends BaseEntity
     #[Column(type: 'money', nullable: true)]
     private ?Money $estimatedPrice = null;
 
-    #[Column(type: 'integer', nullable: true)]
-    private ?int $driversFee = null;
+    #[Column(type: 'money', nullable: true)]
+    private ?Money $driversFee = null;
 
     #[Column(type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $dateTime = null;
@@ -308,12 +308,12 @@ class Transit extends BaseEntity
         $this->estimatedPrice = $estimatedPrice;
     }
 
-    public function getDriversFee(): ?int
+    public function getDriversFee(): ?Money
     {
         return $this->driversFee;
     }
 
-    public function setDriversFee(?int $driversFee): void
+    public function setDriversFee(?Money $driversFee): void
     {
         $this->driversFee = $driversFee;
     }

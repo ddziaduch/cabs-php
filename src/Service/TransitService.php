@@ -17,6 +17,7 @@ use LegacyFighter\Cabs\Repository\DriverPositionRepository;
 use LegacyFighter\Cabs\Repository\DriverRepository;
 use LegacyFighter\Cabs\Repository\DriverSessionRepository;
 use LegacyFighter\Cabs\Repository\TransitRepository;
+use LegacyFighter\Cabs\VO\Money;
 
 class TransitService
 {
@@ -484,7 +485,7 @@ class TransitService
             $driver->setOccupied(false);
             $transit->setCompleteAt($this->clock->now());
             $driverFee = $this->driverFeeService->calculateDriverFee($transitId);
-            $transit->setDriversFee($driverFee);
+            $transit->setDriversFee(Money::from($driverFee));
             $this->driverRepository->save($driver);
             $this->awardsService->registerMiles($transit->getClient()->getId(), $transitId);
             $this->transitRepository->save($transit);

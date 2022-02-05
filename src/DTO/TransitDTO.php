@@ -52,7 +52,9 @@ class TransitDTO implements \JsonSerializable
         $this->from = AddressDTO::from($transit->getFrom());
         $this->carClass = $transit->getCarType();
         $this->clientDTO = ClientDTO::from($transit->getClient());
-        $this->driverFee = $transit->getDriversFee();
+        if ($transit->getDriversFee()) {
+            $this->driverFee = (float) $transit->getDriversFee()->toInt();
+        }
         if ($transit->getEstimatedPrice()) {
             $this->estimatedPrice = (float) $transit->getEstimatedPrice()->toInt();
         }

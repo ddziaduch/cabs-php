@@ -25,7 +25,7 @@ class DriverFeeService
             throw new \InvalidArgumentException('transit does not exist, id = '.$transitId);
         }
         if($transit->getDriversFee() !== null) {
-            return $transit->getDriversFee();
+            return $transit->getDriversFee()->toInt();
         }
         $transitPrice = $transit->getPrice();
         $driverFee = $this->driverFeeRepository->findByDriver($transit->getDriver());
