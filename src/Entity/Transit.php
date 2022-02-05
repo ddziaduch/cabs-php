@@ -298,14 +298,14 @@ class Transit extends BaseEntity
         $this->price = $price;
     }
 
-    public function getEstimatedPrice(): ?int
+    public function getEstimatedPrice(): ?Money
     {
         return $this->estimatedPrice;
     }
 
-    public function setEstimatedPrice(?int $estimatedPrice): void
+    public function setEstimatedPrice(?Money $estimatedPrice): void
     {
-        $this->estimatedPrice = Money::from($estimatedPrice);
+        $this->estimatedPrice = $estimatedPrice;
     }
 
     public function getDriversFee(): ?int
