@@ -35,6 +35,19 @@ class Money implements \Stringable
         return new self((int) round($this->amount * $percentage / 100));
     }
 
+    public function max(Money ...$others): Money
+    {
+        return Money::from(
+            max(
+                $this->amount,
+                ...array_map(
+                    fn (Money $other) => $other->amount,
+                    $others,
+                ),
+            ),
+        );
+    }
+
     public function toInt(): int
     {
         return $this->amount;

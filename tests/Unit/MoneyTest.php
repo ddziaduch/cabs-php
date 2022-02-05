@@ -48,7 +48,7 @@ class MoneyTest extends TestCase
     public function supportsPercentage()
     {
         self::assertSame(10, Money::from(100)->percentage(10)->toInt());
-        self::assertSame(4, Money::from(50)->percentage(2)->toInt());
+        self::assertSame(1, Money::from(50)->percentage(2)->toInt());
     }
 
     /**
@@ -58,5 +58,19 @@ class MoneyTest extends TestCase
     {
         self::assertSame('10.00', (string) Money::from(10));
         self::assertSame('123.00', (string) Money::from(123));
+    }
+
+    /**
+     * @test
+     */
+    public function supportMax(): void
+    {
+        self::assertSame(
+            50,
+            Money::from(49)->max(
+                Money::from(50),
+                Money::from(25),
+            )->toInt(),
+        );
     }
 }
