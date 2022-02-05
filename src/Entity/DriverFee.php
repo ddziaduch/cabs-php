@@ -6,6 +6,7 @@ use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\OneToOne;
 use LegacyFighter\Cabs\Common\BaseEntity;
+use LegacyFighter\Cabs\VO\Money;
 
 #[Entity]
 class DriverFee extends BaseEntity
@@ -22,15 +23,15 @@ class DriverFee extends BaseEntity
     #[Column(type: 'integer')]
     private int $amount;
 
-    #[Column(type: 'integer', nullable: true)]
-    private ?int $min;
+    #[Column(type: 'money', nullable: true)]
+    private ?Money $min;
 
     public function __construct(string $type, Driver $driver, int $amount, ?int $min = null)
     {
         $this->type = $type;
         $this->driver = $driver;
         $this->amount = $amount;
-        $this->min = $min;
+        $this->min = $min === null ? null : Money::from($min);
     }
 
     public function getType(): string
@@ -63,12 +64,12 @@ class DriverFee extends BaseEntity
         $this->amount = $amount;
     }
 
-    public function getMin(): ?int
+    public function getMin(): ?Money
     {
         return $this->min;
     }
 
-    public function setMin(?int $min): void
+    public function setMin(?Money $min): void
     {
         $this->min = $min;
     }

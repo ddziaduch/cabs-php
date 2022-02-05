@@ -38,6 +38,6 @@ class DriverFeeService
             $finalFee = $transitPrice->percentage($driverFee->getAmount());
         }
 
-        return max($finalFee->toInt(), $driverFee->getMin() === null ? 0 : $driverFee->getMin());
+        return max($finalFee->toInt(), $driverFee->getMin() === null ? 0 : $driverFee->getMin()->toInt());
     }
 }
