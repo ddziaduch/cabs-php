@@ -46,4 +46,13 @@ class DistanceTest extends TestCase
             'expectedFormat' => '100000m',
         ];
     }
+
+    /**
+     * @test
+     */
+    public function providesKmAsFloat(): void
+    {
+        $distance = Distance::ofKm(100);
+        self::assertSame(100.0, $distance->toKmAsFloat());
+    }
 }

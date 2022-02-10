@@ -17,6 +17,11 @@ class Distance
         return new self($km);
     }
 
+    public function toKmAsFloat(): float
+    {
+        return $this->km;
+    }
+
     public function formatAs(string $unit): string
     {
         if ($unit === 'km') {
