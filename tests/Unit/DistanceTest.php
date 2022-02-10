@@ -50,6 +50,15 @@ class DistanceTest extends TestCase
     /**
      * @test
      */
+    public function hasShortcutForZero(): void
+    {
+        $distance = Distance::zero();
+        self::assertSame('0km', $distance->formatAs('km'));
+    }
+
+    /**
+     * @test
+     */
     public function providesKmAsFloat(): void
     {
         $distance = Distance::ofKm(100);

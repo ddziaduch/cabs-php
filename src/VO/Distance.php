@@ -17,6 +17,11 @@ class Distance
         return new self($km);
     }
 
+    public static function zero(): self
+    {
+        return new self(0);
+    }
+
     public function toKmAsFloat(): float
     {
         return $this->km;
