@@ -284,9 +284,9 @@ class Transit extends BaseEntity
             : null;
     }
 
-    public function setKm(float $km): void
+    public function setKm(Distance $distance): void
     {
-        $this->km = $km;
+        $this->km = $distance->toKmAsFloat();
         $this->estimateCost();
     }
 

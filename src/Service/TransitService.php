@@ -17,6 +17,7 @@ use LegacyFighter\Cabs\Repository\DriverPositionRepository;
 use LegacyFighter\Cabs\Repository\DriverRepository;
 use LegacyFighter\Cabs\Repository\DriverSessionRepository;
 use LegacyFighter\Cabs\Repository\TransitRepository;
+use LegacyFighter\Cabs\VO\Distance;
 use LegacyFighter\Cabs\VO\Money;
 
 class TransitService
@@ -96,7 +97,9 @@ class TransitService
         $transit->setCarType($carClass);
         $transit->setStatus(Transit::STATUS_DRAFT);
         $transit->setDateTime($this->clock->now());
-        $transit->setKm($this->distanceCalculator->calculateByMap($geoFrom[0], $geoFrom[1], $geoTo[0], $geoTo[1]));
+        $transit->setKm(Distance::ofKm(
+            $this->distanceCalculator->calculateByMap($geoFrom[0], $geoFrom[1], $geoTo[0], $geoTo[1])
+        ));
 
         return $this->transitRepository->save($transit);
     }
@@ -153,7 +156,9 @@ class TransitService
         }
 
         $transit->setFrom($newAddress);
-        $transit->setKm($this->distanceCalculator->calculateByMap($geoFromNew[0], $geoFromNew[1], $geoFromOld[0], $geoFromOld[1]));
+        $transit->setKm(Distance::ofKm(
+            $this->distanceCalculator->calculateByMap($geoFromNew[0], $geoFromNew[1], $geoFromOld[0], $geoFromOld[1])
+        ));
         $transit->setPickupAddressChangeCounter($transit->getPickupAddressChangeCounter() + 1);
         $this->transitRepository->save($transit);
 
@@ -180,7 +185,9 @@ class TransitService
         $geoTo = $this->geocodingService->geocodeAddress($newAddress);
 
         $transit->setTo($newAddress);
-        $transit->setKm($this->distanceCalculator->calculateByMap($geoFrom[0], $geoFrom[1], $geoTo[0], $geoTo[1]));
+        $transit->setKm(Distance::ofKm(
+            $this->distanceCalculator->calculateByMap($geoFrom[0], $geoFrom[1], $geoTo[0], $geoTo[1])
+        ));
 
         if($transit->getDriver() !== null) {
             $this->notificationService->notifyAboutChangedTransitAddress($transit->getDriver()->getId(), $transit->getId());
@@ -214,7 +221,7 @@ class TransitService
 
         $transit->setStatus(Transit::STATUS_CANCELLED);
         $transit->setDriver(null);
-        $transit->setKm(0.0);
+        $transit->setKm(Distance::zero());
         $transit->setAwaitingDriversResponses(0);
         $this->transitRepository->save($transit);
     }
@@ -265,7 +272,7 @@ class TransitService
                         ($transit->getStatus() === Transit::STATUS_CANCELLED)
                     ) {
                         $transit->setStatus(Transit::STATUS_DRIVER_ASSIGNMENT_FAILED);
-                        $transit->setDriver(null); $transit->setKm(0.0);
+                        $transit->setDriver(null); $transit->setKm(Distance::zero());
                         $transit->setAwaitingDriversResponses(0);
                         $this->transitRepository->save($transit);
                         return $transit;
@@ -479,7 +486,9 @@ class TransitService
             $geoTo = $this->geocodingService->geocodeAddress($transit->getTo());
 
             $transit->setTo($destinationAddress);
-            $transit->setKm($this->distanceCalculator->calculateByMap($geoFrom[0], $geoFrom[1], $geoTo[0], $geoTo[1]));
+            $transit->setKm(Distance::ofKm(
+                $this->distanceCalculator->calculateByMap($geoFrom[0], $geoFrom[1], $geoTo[0], $geoTo[1])
+            ));
             $transit->setStatus(Transit::STATUS_COMPLETED);
             $transit->calculateFinalCosts();
             $driver->setOccupied(false);

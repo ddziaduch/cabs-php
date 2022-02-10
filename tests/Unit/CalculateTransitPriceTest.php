@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace LegacyFighter\Cabs\Tests\Unit;
 
 use LegacyFighter\Cabs\Entity\Transit;
+use LegacyFighter\Cabs\VO\Distance;
 use PHPUnit\Framework\TestCase;
 
 class CalculateTransitPriceTest extends TestCase
@@ -81,7 +82,7 @@ class CalculateTransitPriceTest extends TestCase
         };
         $transit->setStatus('draft');
         $transit->setDateTime(new \DateTimeImmutable());
-        $transit->setKm(10.0);
+        $transit->setKm(Distance::ofKm(10.0));
 
         return $transit;
     }

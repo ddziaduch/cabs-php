@@ -8,6 +8,7 @@ use LegacyFighter\Cabs\DTO\TransitDTO;
 use LegacyFighter\Cabs\Entity\Address;
 use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Entity\Transit;
+use LegacyFighter\Cabs\VO\Distance;
 use PHPUnit\Framework\TestCase;
 
 class DistancePresentationTest extends TestCase
@@ -87,7 +88,7 @@ class DistancePresentationTest extends TestCase
         $transit->setFrom($addressFrom);
         $transit->setStatus(Transit::STATUS_DRAFT);
         $transit->setDateTime(new \DateTimeImmutable());
-        $transit->setKm(100);
+        $transit->setKm(Distance::ofKm(100));
 
         return TransitDTO::from($transit);
     }
