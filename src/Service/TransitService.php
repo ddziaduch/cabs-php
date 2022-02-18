@@ -18,7 +18,6 @@ use LegacyFighter\Cabs\Repository\DriverRepository;
 use LegacyFighter\Cabs\Repository\DriverSessionRepository;
 use LegacyFighter\Cabs\Repository\TransitRepository;
 use LegacyFighter\Cabs\VO\Distance;
-use LegacyFighter\Cabs\VO\Money;
 
 class TransitService
 {
