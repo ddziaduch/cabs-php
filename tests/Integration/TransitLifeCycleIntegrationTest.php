@@ -52,6 +52,26 @@ class TransitLifeCycleIntegrationTest extends KernelTestCase
         $this->transitService->createTransit($dto);
     }
 
+    /** @test */
+    public function canNotBeCreatedWhenDriverDoesNotExist(): void
+    {
+        $transit = $this->getTransit();
+        $transit->setFrom($this->getAddress());
+        $transit->setTo($this->getAddress());
+
+        $client = $this->getClient(1);
+
+        $transit->setClient($client);
+        $transit->setCarType(CarType::CAR_CLASS_ECO);
+
+        $dto = TransitDTO::from($transit);
+        $dto->getFrom()->setDistrict($transit->getFrom()->getDistrict());
+        $dto->getTo()->setDistrict($transit->getTo()->getDistrict());
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->transitService->createTransit($dto);
+    }
+
     protected function setUp(): void
     {
         parent::setUp();

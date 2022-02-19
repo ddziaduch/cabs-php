@@ -52,9 +52,17 @@ trait WithFixtures
         return $transit;
     }
 
-    private function getClient(): Client
+    private function getClient(?int $id = null): Client
     {
-        $client = new Client();
+        $client = $id === null
+            ? new Client()
+            : new class($id) extends Client {
+                public function __construct(int $id)
+                {
+                    parent::__construct();
+                    $this->id = $id;
+                }
+            };
         $client->setType(Client::TYPE_NORMAL);
         $client->setName('Jan');
         $client->setLastName('Kowalski');
