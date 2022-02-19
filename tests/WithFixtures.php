@@ -25,18 +25,18 @@ trait WithFixtures
     }
 
     public function getTransit(
-        ?int $id = 1,
+        ?int $id = null,
         ?\DateTimeImmutable $dateTime = null,
         ?Driver $driver = null,
         ?int $price = null
     ): Transit {
         $transit = $id === null
             ? new Transit()
-            : new class() extends Transit {
-                public function __construct()
+            : new class($id) extends Transit {
+                public function __construct(int $id)
                 {
                     parent::__construct();
-                    $this->id = 1;
+                    $this->id = $id;
                 }
             };
         $transit->setStatus(Transit::STATUS_DRAFT);

@@ -93,10 +93,9 @@ class CalculateDriverPeriodicPaymentsIntegrationTest extends KernelTestCase
     private function createTransit(Driver $driver, int $price, \DateTimeImmutable $dateTime): Transit
     {
         $transit = $this->getTransit(
-            null,
-            $dateTime,
-            $driver,
-            $price,
+            dateTime: $dateTime,
+            driver: $driver,
+            price: $price,
         );
 
         self::getContainer()->get(TransitRepository::class)->save($transit);

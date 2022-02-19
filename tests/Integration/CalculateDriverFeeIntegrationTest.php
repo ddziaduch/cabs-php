@@ -73,7 +73,7 @@ class CalculateDriverFeeIntegrationTest extends KernelTestCase
 
     private function createTransit(Driver $driver): Transit
     {
-        $transit = $this->getTransit(id: null, driver: $driver, price: 100);
+        $transit = $this->getTransit(driver: $driver, price: 100);
 
         self::getContainer()->get(TransitRepository::class)->save($transit);
 

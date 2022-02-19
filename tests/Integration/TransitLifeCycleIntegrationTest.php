@@ -6,7 +6,6 @@ namespace LegacyFighter\Cabs\Tests\Integration;
 
 use LegacyFighter\Cabs\DTO\TransitDTO;
 use LegacyFighter\Cabs\Entity\CarType;
-use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Repository\AddressRepository;
 use LegacyFighter\Cabs\Repository\ClientRepository;
 use LegacyFighter\Cabs\Repository\DriverPositionRepository;
@@ -34,7 +33,7 @@ class TransitLifeCycleIntegrationTest extends KernelTestCase
     /** @test */
     public function canBeCreated(): void
     {
-        $transit = $this->getTransit();
+        $transit = $this->getTransit(1);
         $transit->setFrom($this->getAddress());
         $transit->setTo($this->getAddress());
 
@@ -55,7 +54,7 @@ class TransitLifeCycleIntegrationTest extends KernelTestCase
     /** @test */
     public function canNotBeCreatedWhenDriverDoesNotExist(): void
     {
-        $transit = $this->getTransit();
+        $transit = $this->getTransit(1);
         $transit->setFrom($this->getAddress());
         $transit->setTo($this->getAddress());
 

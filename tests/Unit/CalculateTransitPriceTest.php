@@ -6,7 +6,6 @@ namespace LegacyFighter\Cabs\Tests\Unit;
 
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Tests\WithFixtures;
-use LegacyFighter\Cabs\VO\Distance;
 use PHPUnit\Framework\TestCase;
 
 class CalculateTransitPriceTest extends TestCase
@@ -44,8 +43,8 @@ class CalculateTransitPriceTest extends TestCase
      */
     public function cannotEstimateFinalCostWhenStatusIsCompleted(): void
     {
-        $transit = $this->getTransit();
-        $transit->setStatus('completed');
+        $transit = $this->getTransit(1);
+        $transit->setStatus(Transit::STATUS_COMPLETED);
 
         $this->expectException(\RuntimeException::class);
 
@@ -58,7 +57,7 @@ class CalculateTransitPriceTest extends TestCase
     public function calculatePriceOnRegularDay(): void
     {
         $transit = $this->getTransit();
-        $transit->setStatus('completed');
+        $transit->setStatus(Transit::STATUS_COMPLETED);
         $transit->setDateTime(new \DateTimeImmutable('2022-02-04T00:00:00Z'));
         $finalCosts = $transit->calculateFinalCosts();
 
