@@ -11,11 +11,14 @@ use LegacyFighter\Cabs\Repository\DriverFeeRepository;
 use LegacyFighter\Cabs\Repository\TransitRepository;
 use LegacyFighter\Cabs\Service\DriverFeeService;
 use LegacyFighter\Cabs\Service\DriverService;
+use LegacyFighter\Cabs\Tests\WithFixtures;
 use LegacyFighter\Cabs\VO\Money;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class CalculateDriverFeeIntegrationTest extends KernelTestCase
 {
+    use WithFixtures;
+
     /**
      * @test
      */
@@ -70,11 +73,7 @@ class CalculateDriverFeeIntegrationTest extends KernelTestCase
 
     private function createTransit(Driver $driver): Transit
     {
-        $transit = new Transit();
-        $transit->setStatus('draft');
-        $transit->setPrice(Money::from(100));
-        $transit->setDriver($driver);
-        $transit->setDateTime(new \DateTimeImmutable());
+        $transit = $this->getTransit(id: null, driver: $driver, price: 100);
 
         self::getContainer()->get(TransitRepository::class)->save($transit);
 

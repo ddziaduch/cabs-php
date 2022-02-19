@@ -5,18 +5,21 @@ declare(strict_types=1);
 namespace LegacyFighter\Cabs\Tests\Unit;
 
 use LegacyFighter\Cabs\Entity\Transit;
+use LegacyFighter\Cabs\Tests\WithFixtures;
 use LegacyFighter\Cabs\VO\Distance;
 use PHPUnit\Framework\TestCase;
 
 class CalculateTransitPriceTest extends TestCase
 {
+    use WithFixtures;
+
     /**
      * @test
      * @dataProvider nonCompleteStatusDataProvider
      */
     public function cannotCalculateFinalCostsWhenStatusIsNotCompleted(string $status): void
     {
-        $transit = $this->createTransit();
+        $transit = $this->getTransit();
         $transit->setStatus($status);
 
         $this->expectException(\RuntimeException::class);
@@ -41,7 +44,7 @@ class CalculateTransitPriceTest extends TestCase
      */
     public function cannotEstimateFinalCostWhenStatusIsCompleted(): void
     {
-        $transit = $this->createTransit();
+        $transit = $this->getTransit();
         $transit->setStatus('completed');
 
         $this->expectException(\RuntimeException::class);
@@ -54,7 +57,7 @@ class CalculateTransitPriceTest extends TestCase
      */
     public function calculatePriceOnRegularDay(): void
     {
-        $transit = $this->createTransit();
+        $transit = $this->getTransit();
         $transit->setStatus('completed');
         $transit->setDateTime(new \DateTimeImmutable('2022-02-04T00:00:00Z'));
         $finalCosts = $transit->calculateFinalCosts();
@@ -64,26 +67,10 @@ class CalculateTransitPriceTest extends TestCase
 
     public function estimatePriceOnRegularDay(): void
     {
-        $transit = $this->createTransit();
+        $transit = $this->getTransit();
         $transit->setDateTime(new \DateTimeImmutable('2022-02-04T00:00:00Z'));
         $finalCosts = $transit->estimateCost();
 
         self::assertSame(1900, $finalCosts);
-    }
-
-    public function createTransit(): Transit
-    {
-        $transit = new class() extends Transit {
-            public function __construct()
-            {
-                parent::__construct();
-                $this->id = 1;
-            }
-        };
-        $transit->setStatus('draft');
-        $transit->setDateTime(new \DateTimeImmutable());
-        $transit->setKm(Distance::ofKm(10.0));
-
-        return $transit;
     }
 }
