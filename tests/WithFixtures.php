@@ -6,6 +6,7 @@ namespace LegacyFighter\Cabs\Tests;
 
 use LegacyFighter\Cabs\Common\Clock;
 use LegacyFighter\Cabs\Entity\Address;
+use LegacyFighter\Cabs\Entity\CarType;
 use LegacyFighter\Cabs\Entity\Client;
 use LegacyFighter\Cabs\Entity\Driver;
 use LegacyFighter\Cabs\Entity\Transit;
@@ -48,6 +49,7 @@ trait WithFixtures
         if ($price !== null) {
             $transit->setPrice(Money::from($price));
         }
+        $transit->setCarType(CarType::CAR_CLASS_ECO);
 
         return $transit;
     }
@@ -71,12 +73,18 @@ trait WithFixtures
         return $client;
     }
 
-    private function getAddress(): Address
-    {
-        $address = new Address('Poland', 'Gdańsk', 'Nowe Ogrody', 1);
-        $address->setPostalCode('80-100');
-        $address->setName('Test');
-        $address->setDistrict('Śródmieście');
+    private function getAddress(
+        ?string $city = null,
+        ?string $street = null,
+        ?int $buildingNumber = null,
+        ?string $postCode = null,
+        ?string $district = null,
+        ?string $name = null
+    ): Address {
+        $address = new Address('Poland', $city ?? 'Gdańsk', $street ?? 'Nowe Ogrody', $buildingNumber ?? 1);
+        $address->setPostalCode($postCode ?? '80-100');
+        $address->setName($name ?? 'Test');
+        $address->setDistrict($district ?? 'Śródmieście');
 
         return $address;
     }
