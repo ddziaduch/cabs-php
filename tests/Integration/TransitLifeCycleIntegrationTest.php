@@ -60,14 +60,6 @@ class TransitLifeCycleIntegrationTest extends KernelTestCase
         self::assertEquals(Distance::ofKm(10.0), $transit->getKm());
     }
 
-    /** @test */
-    public function canNotBeCreatedWhenDriverDoesNotExist(): void
-    {
-        $dto = $this->getTransitDto($this->getClient(1));
-        $this->expectException(\InvalidArgumentException::class);
-        $this->transitService->createTransit($dto);
-    }
-
     /**
      * @test
      */
@@ -102,6 +94,7 @@ class TransitLifeCycleIntegrationTest extends KernelTestCase
         self::getContainer()->get(TransitRepository::class)->save($transit);
         $newDestination = $this->getAddress('Sopot', 'Malczewskiego', 13);
         $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Address \'to\' cannot be changed, id = '.$transit->getId());
         $this->transitService->changeTransitAddressToNew($transit->getId(), $newDestination);
     }
 
@@ -126,6 +119,31 @@ class TransitLifeCycleIntegrationTest extends KernelTestCase
         self::assertSame(Transit::STATUS_TRANSIT_TO_PASSENGER, $publishedTransit->getStatus());
         self::assertSame($driver, $transit->getDriver());
         self::assertSame(0, $transit->getAwaitingDriversResponses());
+    }
+
+    /** @test */
+    public function canNotBeAcceptedByDriverWhoRejectedFirst(): void
+    {
+        $driver = $this->createNearByDriver();
+        $transit = $this->createTransit();
+        $this->transitService->publishTransit($transit->getId());
+        $this->transitService->rejectTransit($driver->getId(), $transit->getId());
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('"Driver out of possible drivers, id = '.$driver->getId());
+        $this->transitService->acceptTransit($driver->getId(), $transit->getId());
+    }
+
+    /** @test */
+    public function canBeAcceptedByOnlyOneDriver(): void
+    {
+        $driver1 = $this->createNearByDriver();
+        $driver2 = $this->createAnotherDriver();
+        $transit = $this->createTransit();
+        $this->transitService->publishTransit($transit->getId());
+        $this->transitService->acceptTransit($driver1->getId(), $transit->getId());
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Transit already accepted, id = '.$transit->getId());
+        $this->transitService->acceptTransit($driver2->getId(), $transit->getId());
     }
 
     /** @test */
@@ -256,6 +274,30 @@ class TransitLifeCycleIntegrationTest extends KernelTestCase
             $driver->getId(),
             1,
             1
+        );
+
+        return $driver;
+    }
+
+    private function createAnotherDriver(): Driver
+    {
+        $driverService = self::getContainer()->get(DriverService::class);
+
+        $driver = $driverService->createDriver('FARME100165AB5AB', 'Jan', 'Kowalski', 'regular', 'active', null);
+
+        $driverService->changeDriverStatus($driver->getId(), Driver::STATUS_ACTIVE);
+
+        self::getContainer()->get(DriverSessionService::class)->logIn(
+            $driver->getId(),
+            'GD 56789',
+            CarType::CAR_CLASS_ECO,
+            'Dacia'
+        );
+
+        self::getContainer()->get(DriverTrackingService::class)->registerPosition(
+            $driver->getId(),
+            1000,
+            1000
         );
 
         return $driver;
