@@ -118,33 +118,21 @@ class Transit extends BaseEntity
     private ?string $carType = null;
 
     public function __construct(
-        ?Client $client = null,
-        ?Address $from = null,
-        ?Address $to = null,
-        ?string $carClass = null,
-        ?\DateTimeImmutable $dateTime = null,
-        ?Distance $distance = null,
+        Client $client,
+        Address $from,
+        Address $to,
+        string $carClass,
+        \DateTimeImmutable $dateTime,
+        Distance $distance,
     ) {
-        if ($client !== null) {
-            $this->client = $client;
-        }
-        if ($from !== null) {
-            $this->from = $from;
-        }
-        if ($to !== null) {
-            $this->to = $to;
-        }
-        if ($carClass !== null) {
-            $this->carType = $carClass;
-        }
+        $this->client = $client;
+        $this->from = $from;
+        $this->to = $to;
+        $this->carType = $carClass;
         $this->status = Transit::STATUS_DRAFT;
-        if ($dateTime !== null) {
-            $this->tariff = Tariff::ofTime($dateTime);
-            $this->dateTime = $dateTime;
-        }
-        if ($distance !== null) {
-            $this->km = $distance->toKmInFloat();
-        }
+        $this->tariff = Tariff::ofTime($dateTime);
+        $this->dateTime = $dateTime;
+        $this->km = $distance->toKmInFloat();
         $this->proposedDrivers = new ArrayCollection();
         $this->driversRejections = new ArrayCollection();
     }
@@ -353,11 +341,6 @@ class Transit extends BaseEntity
         return $this->client;
     }
 
-    public function setClient(Client $client): void
-    {
-        $this->client = $client;
-    }
-
     public function estimateCost(): Money
     {
         if($this->status === self::STATUS_COMPLETED) {
@@ -410,11 +393,6 @@ class Transit extends BaseEntity
     public function getCarType(): ?string
     {
         return $this->carType;
-    }
-
-    public function setCarType(?string $carType): void
-    {
-        $this->carType = $carType;
     }
 
     public function getTariff(): Tariff

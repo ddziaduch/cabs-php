@@ -2,9 +2,9 @@
 
 namespace LegacyFighter\Cabs\Tests\Common;
 
+use LegacyFighter\Cabs\Distance\Distance;
 use LegacyFighter\Cabs\DTO\AddressDTO;
 use LegacyFighter\Cabs\DTO\CarTypeDTO;
-use LegacyFighter\Cabs\DTO\ClientDTO;
 use LegacyFighter\Cabs\DTO\TransitDTO;
 use LegacyFighter\Cabs\Entity\Address;
 use LegacyFighter\Cabs\Entity\CarType;
@@ -68,22 +68,37 @@ class Fixtures
         return $this->feeRepository->save($driverFee);
     }
 
-    public function aTransit(?Driver $driver, int $price, ?\DateTimeImmutable $when = null): Transit
-    {
-        $transit = new Transit();
-        $transit->setStatus(Transit::STATUS_DRAFT);
+    public function aTransit(
+        ?Driver $driver,
+        int $price,
+        ?\DateTimeImmutable $when = null,
+        ?Client $client = null,
+        ?Address $from = null,
+        ?Address $to = null,
+    ): Transit {
+        $transit = new Transit(
+            $client ?? $this->aClient(),
+            $from ?? $this->anAddress('Polska', 'Warszawa', 'Młynarska', 20),
+            $to ?? $this->anAddress('Polska', 'Warszawa', 'Zytnia', 20),
+            CarType::CAR_CLASS_VAN,
+            $when ?? new \DateTimeImmutable(),
+            Distance::zero(),
+        );
         $transit->setPrice(Money::from($price));
         $transit->setDriver($driver);
-        $transit->setDateTime($when ?? new \DateTimeImmutable());
         return $this->transitRepository->save($transit);
     }
 
     public function aCompletedTransitAt(int $price, \DateTimeImmutable $when): Transit
     {
-        $transit = $this->aTransit(null, $price, $when);
-        $transit->setTo($this->anAddress('Polska', 'Warszawa', 'Zytnia', 20));
-        $transit->setFrom($this->anAddress('Polska', 'Warszawa', 'Młynarska', 20));
-        $transit->setClient($this->aClient());
+        $transit = $this->aTransit(
+            null,
+            $price,
+            $when,
+            $this->aClient(),
+            $this->anAddress('Polska', 'Warszawa', 'Młynarska', 20),
+            $this->anAddress('Polska', 'Warszawa', 'Zytnia', 20),
+        );
         return $this->transitRepository->save($transit);
     }
 
@@ -100,13 +115,15 @@ class Fixtures
 
     public function aTransitDTOWith(Client $client, AddressDTO $from, AddressDTO $to): TransitDTO
     {
-        $transit = new Transit();
+        $transit = new Transit(
+            $client,
+            $from->toAddressEntity(),
+            $to->toAddressEntity(),
+            CarType::CAR_CLASS_VAN,
+            new \DateTimeImmutable(),
+            Distance::zero(),
+        );
         PrivateProperty::setId(1, $transit);
-        $transit->setDateTime(new \DateTimeImmutable());
-        $transit->setStatus(Transit::STATUS_DRAFT);
-        $transit->setTo($to->toAddressEntity());
-        $transit->setFrom($from->toAddressEntity());
-        $transit->setClient($client);
 
         return TransitDTO::from($transit);
     }
