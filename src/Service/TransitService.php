@@ -221,8 +221,7 @@ class TransitService
             throw new \InvalidArgumentException('Transit does not exist, id = '.$transitId);
         }
 
-        $transit->setStatus(Transit::STATUS_WAITING_FOR_DRIVER_ASSIGNMENT);
-        $transit->setPublished($this->clock->now());
+        $transit->publish($this->clock->now());
         $this->transitRepository->save($transit);
 
         return $this->findDriversForTransit($transitId);

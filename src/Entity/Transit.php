@@ -137,6 +137,12 @@ class Transit extends BaseEntity
         $this->driversRejections = new ArrayCollection();
     }
 
+    public function publish(\DateTimeImmutable $published): void
+    {
+        $this->status = Transit::STATUS_WAITING_FOR_DRIVER_ASSIGNMENT;
+        $this->published = $published;
+    }
+
     public function cancel(): void
     {
         if (
@@ -197,19 +203,9 @@ class Transit extends BaseEntity
         ++$this->pickupAddressChangeCounter;
     }
 
-    public function setClientPaymentStatus(string $clientPaymentStatus): void
-    {
-        $this->clientPaymentStatus = $clientPaymentStatus;
-    }
-
     public function getPaymentType(): ?string
     {
         return $this->paymentType;
-    }
-
-    public function setPaymentType(string $paymentType): void
-    {
-        $this->paymentType = $paymentType;
     }
 
     public function getStatus(): string
@@ -236,11 +232,6 @@ class Transit extends BaseEntity
     public function getDate(): ?\DateTimeImmutable
     {
         return $this->date;
-    }
-
-    public function setDate(\DateTimeImmutable $date): void
-    {
-        $this->date = $date;
     }
 
     public function getFrom(): Address
@@ -359,11 +350,6 @@ class Transit extends BaseEntity
     public function getPublished(): ?\DateTimeImmutable
     {
         return $this->published;
-    }
-
-    public function setPublished(?\DateTimeImmutable $published): void
-    {
-        $this->published = $published;
     }
 
     public function getClient(): Client
