@@ -144,17 +144,19 @@ class TransitService
         // calculate the result
         $distanceInKMeters = $c * $r;
 
-        if(!($transit->getStatus() === Transit::STATUS_DRAFT) ||
-            ($transit->getStatus() === Transit::STATUS_WAITING_FOR_DRIVER_ASSIGNMENT) ||
-            ($transit->getPickupAddressChangeCounter() > 2) ||
-            ($distanceInKMeters > 0.25)
-        ) {
-            throw new \InvalidArgumentException('Address \'from\' cannot be changed, id = '.$transitId);
-        }
+        $transit->changePickupAddress(
+            $newAddress,
+            Distance::ofKm(
+                $this->distanceCalculator->calculateByMap(
+                    $geoFromNew[0],
+                    $geoFromNew[1],
+                    $geoFromOld[0],
+                    $geoFromOld[1],
+                ),
+            ),
+            $distanceInKMeters,
+        );
 
-        $transit->setFrom($newAddress);
-        $transit->setKm(Distance::ofKm($this->distanceCalculator->calculateByMap($geoFromNew[0], $geoFromNew[1], $geoFromOld[0], $geoFromOld[1])));
-        $transit->setPickupAddressChangeCounter($transit->getPickupAddressChangeCounter() + 1);
         $this->transitRepository->save($transit);
 
         foreach ($transit->getProposedDrivers() as $driver) {

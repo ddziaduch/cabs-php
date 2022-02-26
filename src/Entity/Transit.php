@@ -93,7 +93,7 @@ class Transit extends BaseEntity
     private Tariff $tariff;
 
     #[Column(type: 'float', nullable: true)]
-    private ?float $km = null;
+    private ?float $km;
 
     // https://stackoverflow.com/questions/37107123/sould-i-store-price-as-decimal-or-integer-in-mysql
     #[Column(type: 'money', nullable: true)]
@@ -106,7 +106,7 @@ class Transit extends BaseEntity
     private ?Money $driversFee = null;
 
     #[Column(type: 'datetime_immutable', nullable: true)]
-    private ?\DateTimeImmutable $dateTime = null;
+    private ?\DateTimeImmutable $dateTime;
 
     #[Column(type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $published = null;
@@ -115,7 +115,7 @@ class Transit extends BaseEntity
     private Client $client;
 
     #[Column(nullable: true)]
-    private ?string $carType = null;
+    private ?string $carType;
 
     public function __construct(
         Client $client,
@@ -137,19 +137,31 @@ class Transit extends BaseEntity
         $this->driversRejections = new ArrayCollection();
     }
 
-    public function getDriverPaymentStatus(): ?string
-    {
-        return $this->driverPaymentStatus;
-    }
+    public function changePickupAddress(
+        Address $newAddress,
+        Distance $newDistance,
+        float $distanceInKMeters,
+    ): void {
+        if ($this->status !== Transit::STATUS_DRAFT) {
+            throw new \InvalidArgumentException('Address \'from\' cannot be changed, id = '.$this->id);
+        }
 
-    public function setDriverPaymentStatus(string $driverPaymentStatus): void
-    {
-        $this->driverPaymentStatus = $driverPaymentStatus;
-    }
+        if ($this->status === Transit::STATUS_WAITING_FOR_DRIVER_ASSIGNMENT) {
+            throw new \InvalidArgumentException('Address \'from\' cannot be changed, id = '.$this->id);
+        }
 
-    public function getClientPaymentStatus(): ?string
-    {
-        return $this->clientPaymentStatus;
+        if ($distanceInKMeters > 0.25) {
+            throw new \InvalidArgumentException('Address \'from\' cannot be changed, id = '.$this->id);
+        }
+
+        if ($this->pickupAddressChangeCounter > 2) {
+            throw new \InvalidArgumentException('Address \'from\' cannot be changed, id = '.$this->id);
+        }
+
+        $this->from = $newAddress;
+        $this->km = $newDistance->toKmInFloat();
+        $this->estimateCost();
+        ++$this->pickupAddressChangeCounter;
     }
 
     public function setClientPaymentStatus(string $clientPaymentStatus): void
@@ -174,14 +186,14 @@ class Transit extends BaseEntity
 
     public function setStatus(string $status): void
     {
-        if(!in_array($status, [
+        if (!in_array($status, [
             self::STATUS_IN_TRANSIT,
             self::STATUS_TRANSIT_TO_PASSENGER,
             self::STATUS_DRIVER_ASSIGNMENT_FAILED,
             self::STATUS_CANCELLED,
             self::STATUS_COMPLETED,
             self::STATUS_WAITING_FOR_DRIVER_ASSIGNMENT,
-            self::STATUS_DRAFT
+            self::STATUS_DRAFT,
         ], true)) {
             throw new \InvalidArgumentException('Invalid driver status value');
         }
@@ -203,11 +215,6 @@ class Transit extends BaseEntity
         return $this->from;
     }
 
-    public function setFrom(Address $from): void
-    {
-        $this->from = $from;
-    }
-
     public function getTo(): Address
     {
         return $this->to;
@@ -216,16 +223,6 @@ class Transit extends BaseEntity
     public function setTo(Address $to): void
     {
         $this->to = $to;
-    }
-
-    public function getPickupAddressChangeCounter(): int
-    {
-        return $this->pickupAddressChangeCounter;
-    }
-
-    public function setPickupAddressChangeCounter(int $pickupAddressChangeCounter): void
-    {
-        $this->pickupAddressChangeCounter = $pickupAddressChangeCounter;
     }
 
     public function getAcceptedAt(): ?\DateTimeImmutable
@@ -343,7 +340,7 @@ class Transit extends BaseEntity
 
     public function estimateCost(): Money
     {
-        if($this->status === self::STATUS_COMPLETED) {
+        if ($this->status === self::STATUS_COMPLETED) {
             throw new \RuntimeException('Estimating cost for completed transit is forbidden, id = ', $this->id);
         }
 
@@ -356,11 +353,11 @@ class Transit extends BaseEntity
 
     public function calculateFinalCosts(): Money
     {
-        if($this->status === self::STATUS_COMPLETED) {
-            return $this->calculateCost();
-        } else {
+        if ($this->status !== self::STATUS_COMPLETED) {
             throw new \RuntimeException('Cannot calculate final cost if the transit is not completed');
         }
+
+        return $this->calculateCost();
     }
 
     private function calculateCost(): Money
