@@ -12,8 +12,6 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\JoinTable;
 use Doctrine\ORM\Mapping\ManyToMany;
 use Doctrine\ORM\Mapping\ManyToOne;
-use Doctrine\ORM\Mapping\OneToMany;
-use Doctrine\ORM\Mapping\OneToOne;
 use LegacyFighter\Cabs\Common\BaseEntity;
 use LegacyFighter\Cabs\Distance\Distance;
 use LegacyFighter\Cabs\Money\Money;
@@ -119,8 +117,34 @@ class Transit extends BaseEntity
     #[Column(nullable: true)]
     private ?string $carType = null;
 
-    public function __construct()
-    {
+    public function __construct(
+        ?Client $client = null,
+        ?Address $from = null,
+        ?Address $to = null,
+        ?string $carClass = null,
+        ?\DateTimeImmutable $dateTime = null,
+        ?Distance $distance = null,
+    ) {
+        if ($client !== null) {
+            $this->client = $client;
+        }
+        if ($from !== null) {
+            $this->from = $from;
+        }
+        if ($to !== null) {
+            $this->to = $to;
+        }
+        if ($carClass !== null) {
+            $this->carType = $carClass;
+        }
+        $this->status = Transit::STATUS_DRAFT;
+        if ($dateTime !== null) {
+            $this->tariff = Tariff::ofTime($dateTime);
+            $this->dateTime = $dateTime;
+        }
+        if ($distance !== null) {
+            $this->km = $distance->toKmInFloat();
+        }
         $this->proposedDrivers = new ArrayCollection();
         $this->driversRejections = new ArrayCollection();
     }

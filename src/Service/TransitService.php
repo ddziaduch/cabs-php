@@ -84,19 +84,19 @@ class TransitService
             throw new \InvalidArgumentException('Client does not exist, id = '.$clientId);
         }
 
-        $transit = new Transit();
-
         // FIXME later: add some exceptions handling
         $geoFrom = $this->geocodingService->geocodeAddress($from);
         $geoTo = $this->geocodingService->geocodeAddress($to);
 
-        $transit->setClient($client);
-        $transit->setFrom($from);
-        $transit->setTo($to);
-        $transit->setCarType($carClass);
-        $transit->setStatus(Transit::STATUS_DRAFT);
-        $transit->setDateTime($this->clock->now());
-        $transit->setKm(Distance::ofKm($this->distanceCalculator->calculateByMap($geoFrom[0], $geoFrom[1], $geoTo[0], $geoTo[1])));
+        $transit = new Transit(
+            $client,
+            $from,
+            $to,
+            $carClass,
+            $this->clock->now(),
+            Distance::ofKm($this->distanceCalculator->calculateByMap($geoFrom[0], $geoFrom[1], $geoTo[0], $geoTo[1])),
+        );
+        $transit->estimateCost();
 
         return $this->transitRepository->save($transit);
     }
