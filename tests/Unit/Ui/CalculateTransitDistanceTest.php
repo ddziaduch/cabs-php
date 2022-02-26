@@ -60,6 +60,7 @@ class CalculateTransitDistanceTest extends TestCase
         $address = new Address('country', 'city', 'street', 1);
         $address->setName('name');
         $address->setPostalCode('111');
+        $address->setDistrict('district');
         PrivateProperty::setId(1, $address);
 
         $client = new Client();
