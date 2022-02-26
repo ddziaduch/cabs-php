@@ -417,20 +417,17 @@ class TransitService
     {
         $driver = $this->driverRepository->getOne($driverId);
 
-        if($driver === null) {
+        if ($driver === null) {
             throw new \InvalidArgumentException('Driver does not exist, id = '.$driverId);
         }
 
         $transit = $this->transitRepository->getOne($transitId);
 
-        if($transit === null) {
+        if ($transit === null) {
             throw new \InvalidArgumentException('Transit does not exist, id = '.$transitId);
         }
 
-        $rejectedDrivers = $transit->getDriversRejections();
-        $rejectedDrivers[] = $driver;
-        $transit->setDriversRejections($rejectedDrivers);
-        $transit->setAwaitingDriversResponses($transit->getAwaitingDriversResponses() - 1);
+        $transit->reject($driver);
         $this->transitRepository->save($transit);
     }
 

@@ -137,6 +137,12 @@ class Transit extends BaseEntity
         $this->driversRejections = new ArrayCollection();
     }
 
+    public function reject(Driver $driver): void
+    {
+        $this->driversRejections->add($driver);
+        --$this->awaitingDriversResponses;
+    }
+
     public function start(): void
     {
         if ($this->status !== self::STATUS_TRANSIT_TO_PASSENGER) {
@@ -306,29 +312,9 @@ class Transit extends BaseEntity
         return $this->started;
     }
 
-    public function getDriversRejections(): array
-    {
-        return $this->driversRejections->toArray();
-    }
-
-    public function setDriversRejections(array $driversRejections): void
-    {
-        $this->driversRejections = new ArrayCollection($driversRejections);
-    }
-
     public function getProposedDrivers(): array
     {
         return $this->proposedDrivers->toArray();
-    }
-
-    public function getAwaitingDriversResponses(): int
-    {
-        return $this->awaitingDriversResponses;
-    }
-
-    public function setAwaitingDriversResponses(int $awaitingDriversResponses): void
-    {
-        $this->awaitingDriversResponses = $awaitingDriversResponses;
     }
 
     public function getKm(): ?Distance
