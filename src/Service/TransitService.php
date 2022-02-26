@@ -173,16 +173,13 @@ class TransitService
             throw new \InvalidArgumentException('Transit does not exist, id = '.$transitId);
         }
 
-        if($transit->getStatus() === Transit::STATUS_COMPLETED) {
-            throw new \InvalidArgumentException('Address \'to\' cannot be changed, id = '.$transitId);
-        }
-
         // FIXME later: add some exceptions handling
         $geoFrom = $this->geocodingService->geocodeAddress($transit->getFrom());
         $geoTo = $this->geocodingService->geocodeAddress($newAddress);
 
-        $transit->setTo($newAddress);
-        $transit->setKm(Distance::ofKm($this->distanceCalculator->calculateByMap($geoFrom[0], $geoFrom[1], $geoTo[0], $geoTo[1])));
+        $distance = Distance::ofKm($this->distanceCalculator->calculateByMap($geoFrom[0], $geoFrom[1], $geoTo[0], $geoTo[1]));
+
+        $transit->changeDestination($newAddress, $distance);
 
         if($transit->getDriver() !== null) {
             $this->notificationService->notifyAboutChangedTransitAddress($transit->getDriver()->getId(), $transit->getId());

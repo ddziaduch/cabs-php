@@ -129,7 +129,7 @@ class Transit extends BaseEntity
         $this->from = $from;
         $this->to = $to;
         $this->carType = $carClass;
-        $this->status = Transit::STATUS_DRAFT;
+        $this->status = self::STATUS_DRAFT;
         $this->tariff = Tariff::ofTime($dateTime);
         $this->dateTime = $dateTime;
         $this->km = $distance->toKmInFloat();
@@ -137,16 +137,26 @@ class Transit extends BaseEntity
         $this->driversRejections = new ArrayCollection();
     }
 
+    public function changeDestination(Address $newAddress, Distance $newDistance): void
+    {
+        if ($this->status === self::STATUS_COMPLETED) {
+            throw new \InvalidArgumentException('Address \'to\' cannot be changed, id = '.$this->id);
+        }
+        $this->to = $newAddress;
+        $this->km = $newDistance->toKmInFloat();
+        $this->estimateCost();
+    }
+
     public function changePickupAddress(
         Address $newAddress,
         Distance $newDistance,
         float $distanceInKMeters,
     ): void {
-        if ($this->status !== Transit::STATUS_DRAFT) {
+        if ($this->status !== self::STATUS_DRAFT) {
             throw new \InvalidArgumentException('Address \'from\' cannot be changed, id = '.$this->id);
         }
 
-        if ($this->status === Transit::STATUS_WAITING_FOR_DRIVER_ASSIGNMENT) {
+        if ($this->status === self::STATUS_WAITING_FOR_DRIVER_ASSIGNMENT) {
             throw new \InvalidArgumentException('Address \'from\' cannot be changed, id = '.$this->id);
         }
 
