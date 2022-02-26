@@ -360,7 +360,6 @@ class TransitService
                         }
 
                         $this->transitRepository->save($transit);
-
                     } else {
                         // Next iteration, no drivers at specified area
                         continue;
@@ -377,35 +376,23 @@ class TransitService
     public function acceptTransit(int $driverId, int $transitId): void
     {
         $driver = $this->driverRepository->getOne($driverId);
-        if($driver === null) {
+        if ($driver === null) {
             throw new \InvalidArgumentException('Driver does not exist, id = '.$driverId);
-        } else {
-            $transit = $this->transitRepository->getOne($transitId);
-
-            if($transit === null) {
-                throw new \InvalidArgumentException('Transit does not exist, id = '.$transitId);
-            } else {
-                if($transit->getDriver() !== null) {
-                    throw new \RuntimeException('Transit already accepted, id = '.$transitId);
-                } else {
-                    if(!in_array($driver, $transit->getProposedDrivers(), true)) {
-                        throw new \RuntimeException('Driver out of possible drivers, id = ' . $driverId);
-                    } else {
-                        if (in_array($driver, $transit->getDriversRejections(), true)) {
-                            throw new \RuntimeException('"Driver out of possible drivers, id = ' . $driverId);
-                        } else {
-                            $transit->setDriver($driver);
-                            $transit->setAwaitingDriversResponses(0);
-                            $transit->setAcceptedAt($this->clock->now());
-                            $transit->setStatus(Transit::STATUS_TRANSIT_TO_PASSENGER);
-                            $this->transitRepository->save($transit);
-                            $driver->setOccupied(true);
-                            $this->driverRepository->save($driver);
-                        }
-                    }
-                }
-            }
         }
+
+        $transit = $this->transitRepository->getOne($transitId);
+
+        if ($transit === null) {
+            throw new \InvalidArgumentException('Transit does not exist, id = '.$transitId);
+        }
+
+        $acceptedAt = $this->clock->now();
+
+        $transit->accept($driver, $acceptedAt);
+
+        $this->transitRepository->save($transit);
+        $driver->setOccupied(true);
+        $this->driverRepository->save($driver);
     }
 
     public function startTransit(int $driverId, int $transitId): void

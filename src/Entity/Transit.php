@@ -137,6 +137,28 @@ class Transit extends BaseEntity
         $this->driversRejections = new ArrayCollection();
     }
 
+    public function accept(
+        Driver $driver,
+        \DateTimeImmutable $acceptedAt
+    ): void {
+        if ($this->driver !== null) {
+            throw new \RuntimeException('Transit already accepted, id = ' . $this->id);
+        }
+
+        if (!in_array($driver, $this->proposedDrivers->toArray(), true)) {
+            throw new \RuntimeException('Driver out of possible drivers, id = ' . $driver->getId());
+        }
+
+        if (in_array($driver, $this->driversRejections->toArray(), true)) {
+            throw new \RuntimeException('"Driver out of possible drivers, id = ' . $driver->getId());
+        }
+
+        $this->driver = $driver;
+        $this->awaitingDriversResponses = 0;
+        $this->acceptedAt = $acceptedAt;
+        $this->status = self::STATUS_TRANSIT_TO_PASSENGER;
+    }
+
     public function proposeDriver(Driver $driver): void
     {
         $this->proposedDrivers->add($driver);
@@ -267,11 +289,6 @@ class Transit extends BaseEntity
     public function getAcceptedAt(): ?\DateTimeImmutable
     {
         return $this->acceptedAt;
-    }
-
-    public function setAcceptedAt(?\DateTimeImmutable $acceptedAt): void
-    {
-        $this->acceptedAt = $acceptedAt;
     }
 
     public function getStarted(): ?\DateTimeImmutable
