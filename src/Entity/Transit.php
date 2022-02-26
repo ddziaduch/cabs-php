@@ -137,20 +137,30 @@ class Transit extends BaseEntity
         $this->driversRejections = new ArrayCollection();
     }
 
+    public function start(): void
+    {
+        if ($this->status !== self::STATUS_TRANSIT_TO_PASSENGER) {
+            throw new \InvalidArgumentException('Transit cannot be started, id = '.$this->id);
+        }
+
+        $this->status = self::STATUS_IN_TRANSIT;
+        $this->started = (new \DateTimeImmutable());
+    }
+
     public function accept(
         Driver $driver,
         \DateTimeImmutable $acceptedAt
     ): void {
         if ($this->driver !== null) {
-            throw new \RuntimeException('Transit already accepted, id = ' . $this->id);
+            throw new \RuntimeException('Transit already accepted, id = '.$this->id);
         }
 
         if (!in_array($driver, $this->proposedDrivers->toArray(), true)) {
-            throw new \RuntimeException('Driver out of possible drivers, id = ' . $driver->getId());
+            throw new \RuntimeException('Driver out of possible drivers, id = '.$driver->getId());
         }
 
         if (in_array($driver, $this->driversRejections->toArray(), true)) {
-            throw new \RuntimeException('"Driver out of possible drivers, id = ' . $driver->getId());
+            throw new \RuntimeException('"Driver out of possible drivers, id = '.$driver->getId());
         }
 
         $this->driver = $driver;
@@ -294,11 +304,6 @@ class Transit extends BaseEntity
     public function getStarted(): ?\DateTimeImmutable
     {
         return $this->started;
-    }
-
-    public function setStarted(?\DateTimeImmutable $started): void
-    {
-        $this->started = $started;
     }
 
     public function getDriversRejections(): array

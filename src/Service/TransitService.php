@@ -399,22 +399,17 @@ class TransitService
     {
         $driver = $this->driverRepository->getOne($driverId);
 
-        if($driver === null) {
+        if ($driver === null) {
             throw new \InvalidArgumentException('Driver does not exist, id = '.$driverId);
         }
 
         $transit = $this->transitRepository->getOne($transitId);
 
-        if($transit === null) {
+        if ($transit === null) {
             throw new \InvalidArgumentException('Transit does not exist, id = '.$transitId);
         }
 
-        if($transit->getStatus() !== Transit::STATUS_TRANSIT_TO_PASSENGER) {
-            throw new \InvalidArgumentException('Transit cannot be started, id = '.$transitId);
-        }
-
-        $transit->setStatus(Transit::STATUS_IN_TRANSIT);
-        $transit->setStarted(new \DateTimeImmutable());
+        $transit->start();
         $this->transitRepository->save($transit);
     }
 
