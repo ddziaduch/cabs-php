@@ -137,6 +137,29 @@ class Transit extends BaseEntity
         $this->driversRejections = new ArrayCollection();
     }
 
+    public function cancel(): void
+    {
+        if (
+            !in_array(
+                $this->getStatus(),
+                [
+                    self::STATUS_DRAFT,
+                    self::STATUS_WAITING_FOR_DRIVER_ASSIGNMENT,
+                    self::STATUS_TRANSIT_TO_PASSENGER,
+                ],
+                true
+            )
+        ) {
+            throw new \InvalidArgumentException('Transit cannot be cancelled, id = '.$this->id);
+        }
+
+        $this->status = self::STATUS_CANCELLED;
+        $this->driver = null;
+        $this->km = Distance::zero()->toKmInFloat();
+        $this->estimateCost();
+        $this->awaitingDriversResponses = 0;
+    }
+
     public function changeDestination(Address $newAddress, Distance $newDistance): void
     {
         if ($this->status === self::STATUS_COMPLETED) {

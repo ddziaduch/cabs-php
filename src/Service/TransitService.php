@@ -203,19 +203,14 @@ class TransitService
         if($transit === null) {
             throw new \InvalidArgumentException('Transit does not exist, id = '.$transitId);
         }
-        if(!in_array($transit->getStatus(),  [Transit::STATUS_DRAFT, Transit::STATUS_WAITING_FOR_DRIVER_ASSIGNMENT, Transit::STATUS_TRANSIT_TO_PASSENGER], true)) {
-            throw new \InvalidArgumentException('Transit cannot be cancelled, id = '.$transitId);
-        }
+
+        $transit->cancel();
+
+        $this->transitRepository->save($transit);
 
         if($transit->getDriver() !== null) {
             $this->notificationService->notifyAboutCancelledTransit($transit->getDriver()->getId(), $transitId);
         }
-
-        $transit->setStatus(Transit::STATUS_CANCELLED);
-        $transit->setDriver(null);
-        $transit->setKm(Distance::zero());
-        $transit->setAwaitingDriversResponses(0);
-        $this->transitRepository->save($transit);
     }
 
     public function publishTransit(int $transitId): Transit
