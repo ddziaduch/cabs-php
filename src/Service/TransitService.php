@@ -232,40 +232,27 @@ class TransitService
     {
         $transit = $this->transitRepository->getOne($transitId);
 
-        if($transit !== null) {
-            if($transit->getStatus() === Transit::STATUS_WAITING_FOR_DRIVER_ASSIGNMENT) {
-
-
-
+        if ($transit !== null) {
+            if ($transit->isWaitingForDriverAssignment()) {
                 $distanceToCheck = 0;
 
                 // Tested on production, works as expected.
                 // If you change this code and the system will collapse AGAIN, I'll find you...
                 while (true) {
-                    if($transit->getAwaitingDriversResponses()
-                        > 4) {
+                    if ($transit->isAwaitingForDriversResponses()) {
                         return $transit;
                     }
 
-                    $distanceToCheck++;
+                    ++$distanceToCheck;
 
                     // FIXME: to refactor when the final business logic will be determined
-                    if(($transit->getPublished()->modify('+300 seconds') < $this->clock->now())
-                        ||
-                        ($distanceToCheck >= 20)
-                        ||
-                        // Should it be here? How is it even possible due to previous status check above loop?
-                        ($transit->getStatus() === Transit::STATUS_CANCELLED)
-                    ) {
-                        $transit->setStatus(Transit::STATUS_DRIVER_ASSIGNMENT_FAILED);
-                        $transit->setDriver(null);
-                        $transit->setKm(Distance::zero());
-                        $transit->setAwaitingDriversResponses(0);
+                    $now = $this->clock->now();
+                    if ($transit->isWaitingForDriverAssignmentTooLong($now) || $distanceToCheck >= 20) {
+                        $transit->driverAssignmentFailed();
                         $this->transitRepository->save($transit);
                         return $transit;
                     }
                     $geocoded = [];
-
 
                     try {
                         $geocoded = $this->geocodingService->geocodeAddress($transit->getFrom());
@@ -297,60 +284,74 @@ class TransitService
                         180 / M_PI;
                     $longitudeMax = $longitude + $dLon * 180 / M_PI;
 
-                    $driversAvgPositions = $this->driverPositionRepository
-                        ->findAverageDriverPositionSince($latitudeMin, $latitudeMax, $longitudeMin, $longitudeMax, $this->clock->now()->modify('-5 minutes'));
+                    $driversAvgPositions = $this->driverPositionRepository->findAverageDriverPositionSince(
+                        $latitudeMin,
+                        $latitudeMax,
+                        $longitudeMin,
+                        $longitudeMax,
+                        $this->clock->now()->modify(
+                            '-5 minutes'
+                        ),
+                    );
 
-                    if(count($driversAvgPositions) !== 0) {
+                    if (count($driversAvgPositions) !== 0) {
                         usort(
                             $driversAvgPositions,
-                            fn(DriverPositionDTOV2 $d1, DriverPositionDTOV2 $d2) =>
-                                sqrt(pow($latitude - $d1->getLatitude(), 2) + pow($longitude - $d1->getLongitude(), 2)) <=>
-                                sqrt(pow($latitude - $d2->getLatitude(), 2) + pow($longitude - $d2->getLongitude(), 2))
+                            function (DriverPositionDTOV2 $d1, DriverPositionDTOV2 $d2) use ($latitude, $longitude) {
+                                return sqrt(
+                                        pow($latitude - $d1->getLatitude(), 2) + pow(
+                                            $longitude - $d1->getLongitude(),
+                                            2
+                                        )
+                                    )
+                                    <=>
+                                    sqrt(
+                                        pow($latitude - $d2->getLatitude(), 2) + pow(
+                                            $longitude - $d2->getLongitude(),
+                                            2
+                                        )
+                                    );
+                            }
                         );
                         $driversAvgPositions = array_slice($driversAvgPositions, 0, 20);
 
                         $carClasses = [];
                         $activeCarClasses = $this->carTypeService->findActiveCarClasses();
-                        if(count($activeCarClasses) === 0) {
+                        if (count($activeCarClasses) === 0) {
                             return $transit;
                         }
-                        if($transit->getCarType()
-
-                            !== null) {
-                            if(in_array($transit->getCarType(), $activeCarClasses)) {
+                        if ($transit->getCarType() !== null) {
+                            if (in_array($transit->getCarType(), $activeCarClasses)) {
                                 $carClasses[] = $transit->getCarType();
-                            }else {
+                            } else {
                                 return $transit;
-                                }
+                            }
                         } else {
                             $carClasses = $activeCarClasses;
                         }
 
-                        $drivers = array_map(fn(DriverPositionDTOV2 $dp) => $dp->getDriver(), $driversAvgPositions);
+                        $drivers = array_map(fn (DriverPositionDTOV2 $dp) => $dp->getDriver(), $driversAvgPositions);
 
                         $activeDriverIdsInSpecificCar = array_map(
-                            fn(DriverSession $ds)
-                                => $ds->getDriver()->getId(),
-
-                            $this->driverSessionRepository->findAllByLoggedOutAtNullAndDriverInAndCarClassIn($drivers, $carClasses));
+                            fn (DriverSession $ds) => $ds->getDriver()->getId(),
+                            $this->driverSessionRepository->findAllByLoggedOutAtNullAndDriverInAndCarClassIn($drivers, $carClasses)
+                        );
 
                         $driversAvgPositions = array_filter(
                             $driversAvgPositions,
-                            fn(DriverPositionDTOV2 $dp) => in_array($dp->getDriver()->getId(), $activeDriverIdsInSpecificCar)
+                            fn (DriverPositionDTOV2 $dp) => in_array($dp->getDriver()->getId(), $activeDriverIdsInSpecificCar)
                         );
 
                         // Iterate across average driver positions
                         foreach ($driversAvgPositions as $driverAvgPosition) {
                             /** @var DriverPositionDTOV2 $driverAvgPosition */
                             $driver = $driverAvgPosition->getDriver();
-                            if($driver->getStatus() === Driver::STATUS_ACTIVE &&
-
-                                    $driver->getOccupied() == false) {
-                                if(!in_array($driver,
-                                        $transit->getDriversRejections(), true)) {
-                                    $proposedDrivers = $transit->getProposedDrivers();
-                                    $proposedDrivers[] = $driver;
-                                    $transit->setProposedDrivers($proposedDrivers); $transit->setAwaitingDriversResponses($transit->getAwaitingDriversResponses() + 1);
+                            if (
+                                $driver->getStatus() === Driver::STATUS_ACTIVE &&
+                                $driver->getOccupied() == false
+                            ) {
+                                if (!$transit->isDriverRejected($driver)) {
+                                    $transit->proposeDriver($driver);
                                     $this->notificationService->notifyAboutPossibleTransit($driver->getId(), $transitId);
                                 }
                             } else {

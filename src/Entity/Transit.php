@@ -137,6 +137,21 @@ class Transit extends BaseEntity
         $this->driversRejections = new ArrayCollection();
     }
 
+    public function proposeDriver(Driver $driver): void
+    {
+        $this->proposedDrivers->add($driver);
+        ++$this->awaitingDriversResponses;
+    }
+
+    public function driverAssignmentFailed(): void
+    {
+        $this->status = self::STATUS_DRIVER_ASSIGNMENT_FAILED;
+        $this->driver = null;
+        $this->km = Distance::zero()->toKmInFloat();
+        $this->estimateCost();
+        $this->awaitingDriversResponses = 0;
+    }
+
     public function publish(\DateTimeImmutable $published): void
     {
         $this->status = Transit::STATUS_WAITING_FOR_DRIVER_ASSIGNMENT;
@@ -284,11 +299,6 @@ class Transit extends BaseEntity
         return $this->proposedDrivers->toArray();
     }
 
-    public function setProposedDrivers(array $proposedDrivers): void
-    {
-        $this->proposedDrivers = new ArrayCollection($proposedDrivers);
-    }
-
     public function getAwaitingDriversResponses(): int
     {
         return $this->awaitingDriversResponses;
@@ -414,5 +424,25 @@ class Transit extends BaseEntity
     public function getTariff(): Tariff
     {
         return $this->tariff;
+    }
+
+    public function isWaitingForDriverAssignment(): bool
+    {
+        return $this->getStatus() === Transit::STATUS_WAITING_FOR_DRIVER_ASSIGNMENT;
+    }
+
+    public function isAwaitingForDriversResponses(): bool
+    {
+        return $this->awaitingDriversResponses > 4;
+    }
+
+    public function isWaitingForDriverAssignmentTooLong(\DateTimeImmutable $now): bool
+    {
+        return $this->published->modify('+300 seconds') < $now || $this->status === self::STATUS_CANCELLED;
+    }
+
+    public function isDriverRejected(Driver $driver): bool
+    {
+        return $this->driversRejections->contains($driver);
     }
 }
