@@ -149,10 +149,9 @@ class CalculateTransitPriceTest extends TestCase
             new Address('Polska', 'Warszawa', 'Zytnia', 20),
             CarType::CAR_CLASS_VAN,
             new \DateTimeImmutable(),
-            Distance::zero(),
+            Distance::ofKm($km),
         );
         PrivateProperty::setId(1, $transit);
-        $transit->setKm(Distance::ofKm($km));
         $transit->setStatus($status);
         return $transit;
     }

@@ -85,7 +85,11 @@ class Fixtures
             Distance::zero(),
         );
         $transit->setPrice(Money::from($price));
-        $transit->setDriver($driver);
+        if ($driver !== null) {
+            $transit->proposeDriver($driver);
+            $transit->accept($driver, $when ?? new \DateTimeImmutable());
+        }
+
         return $this->transitRepository->save($transit);
     }
 

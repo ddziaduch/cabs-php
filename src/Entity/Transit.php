@@ -330,12 +330,6 @@ class Transit extends BaseEntity
         return $this->km === null ? null : Distance::ofKm($this->km);
     }
 
-    public function setKm(Distance $km): void
-    {
-        $this->km = $km->toKmInFloat();
-        $this->estimateCost();
-    }
-
     public function getPrice(): ?Money
     {
         return $this->price;
@@ -415,11 +409,6 @@ class Transit extends BaseEntity
     public function getDriver(): ?Driver
     {
         return $this->driver;
-    }
-
-    public function setDriver(?Driver $driver): void
-    {
-        $this->driver = $driver;
     }
 
     public function getCompleteAt(): ?\DateTimeImmutable

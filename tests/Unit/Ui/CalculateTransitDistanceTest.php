@@ -71,10 +71,9 @@ class CalculateTransitDistanceTest extends TestCase
         $client->setDefaultPaymentType(Client::PAYMENT_TYPE_MONTHLY_INVOICE);
         PrivateProperty::setId(1, $client);
 
-        $t = new Transit($client, $address, $address, CarType::CAR_CLASS_VAN, new \DateTimeImmutable(), Distance::zero());
+        $t = new Transit($client, $address, $address, CarType::CAR_CLASS_VAN, new \DateTimeImmutable(), Distance::ofKm($km));
         PrivateProperty::setId(1, $t);
         $t->setPrice(Money::from(10));
-        $t->setKm(Distance::ofKm($km));
         return TransitDTO::from($t);
     }
 }
