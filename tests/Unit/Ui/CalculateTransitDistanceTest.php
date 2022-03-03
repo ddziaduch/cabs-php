@@ -7,8 +7,9 @@ use LegacyFighter\Cabs\DTO\TransitDTO;
 use LegacyFighter\Cabs\Entity\Address;
 use LegacyFighter\Cabs\Entity\CarType;
 use LegacyFighter\Cabs\Entity\Client;
+use LegacyFighter\Cabs\Entity\Driver;
+use LegacyFighter\Cabs\Entity\DriverLicense;
 use LegacyFighter\Cabs\Entity\Transit;
-use LegacyFighter\Cabs\Money\Money;
 use LegacyFighter\Cabs\Tests\Common\PrivateProperty;
 use PHPUnit\Framework\TestCase;
 
@@ -71,9 +72,22 @@ class CalculateTransitDistanceTest extends TestCase
         $client->setDefaultPaymentType(Client::PAYMENT_TYPE_MONTHLY_INVOICE);
         PrivateProperty::setId(1, $client);
 
-        $t = new Transit($client, $address, $address, CarType::CAR_CLASS_VAN, new \DateTimeImmutable(), Distance::ofKm($km));
-        PrivateProperty::setId(1, $t);
-        $t->setPrice(Money::from(10));
-        return TransitDTO::from($t);
+        $transit = new Transit($client, $address, $address, CarType::CAR_CLASS_VAN, new \DateTimeImmutable(), Distance::ofKm($km));
+        PrivateProperty::setId(1, $transit);
+
+        $driver = new Driver();
+        $driver->setFirstName('Jan');
+        $driver->setLastName('Kowalski');
+        $driver->setDriverLicense(DriverLicense::withLicense('FARME100165AB5EW'));
+        $driver->setType(Driver::TYPE_REGULAR);
+        $driver->setStatus(Driver::STATUS_ACTIVE);
+        PrivateProperty::setId(1, $driver);
+
+        $transit->proposeDriver($driver);
+        $transit->accept($driver, new \DateTimeImmutable());
+
+        $transit->complete($transit->getTo(), $transit->getKm(), new \DateTimeImmutable());
+
+        return TransitDTO::from($transit);
     }
 }

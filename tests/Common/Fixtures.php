@@ -96,13 +96,15 @@ class Fixtures
     public function aCompletedTransitAt(int $price, \DateTimeImmutable $when): Transit
     {
         $transit = $this->aTransit(
-            null,
+            $this->aDriver(),
             $price,
             $when,
             $this->aClient(),
             $this->anAddress('Polska', 'Warszawa', 'Młynarska', 20),
             $this->anAddress('Polska', 'Warszawa', 'Zytnia', 20),
         );
+        $transit->complete($transit->getTo(), $transit->getKm(), $transit->getDateTime());
+
         return $this->transitRepository->save($transit);
     }
 
