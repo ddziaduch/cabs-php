@@ -6,6 +6,7 @@ use LegacyFighter\Cabs\Distance\Distance;
 use LegacyFighter\Cabs\Entity\Address;
 use LegacyFighter\Cabs\Entity\CarType;
 use LegacyFighter\Cabs\Entity\Client;
+use LegacyFighter\Cabs\Entity\Driver;
 use LegacyFighter\Cabs\Entity\Transit;
 use LegacyFighter\Cabs\Money\Money;
 use LegacyFighter\Cabs\Tests\Common\PrivateProperty;
@@ -19,7 +20,8 @@ class CalculateTransitPriceTest extends TestCase
     public function cannotCalculatePriceWhenTransitIsCancelled(): void
     {
         //given
-        $transit = $this->transit(Transit::STATUS_CANCELLED, 20);
+        $transit = $this->transit(20);
+        $transit->cancel();
 
         //expect
         $this->expectException(\RuntimeException::class);
@@ -32,7 +34,8 @@ class CalculateTransitPriceTest extends TestCase
     public function cannotEstimatePriceWhenTransitIsCompleted(): void
     {
         //given
-        $transit = $this->transit(Transit::STATUS_COMPLETED, 20);
+        $transit = $this->transit(20);
+        $this->completeTransit($transit);
 
         //expect
         $this->expectException(\RuntimeException::class);
@@ -45,10 +48,9 @@ class CalculateTransitPriceTest extends TestCase
     public function calculatePriceOnRegularDay(): void
     {
         //given
-        $transit = $this->transit(Transit::STATUS_COMPLETED, 20);
+        $transit = $this->transit(20, $this->friday());
+        $this->completeTransit($transit);
 
-        //friday
-        $this->transitWasOnDoneOnFriday($transit);
         //when
         $price = $transit->calculateFinalCosts();
 
@@ -62,10 +64,8 @@ class CalculateTransitPriceTest extends TestCase
     public function estimatePriceOnRegularDay(): void
     {
         //given
-        $transit = $this->transit(Transit::STATUS_DRAFT, 20);
+        $transit = $this->transit(20, $this->friday());
 
-        //friday
-        $this->transitWasOnDoneOnFriday($transit);
         //when
         $price = $transit->estimateCost();
 
@@ -79,9 +79,8 @@ class CalculateTransitPriceTest extends TestCase
     public function calculatePriceOnSunday(): void
     {
         //given
-        $transit = $this->transit(Transit::STATUS_COMPLETED, 20);
-        //and
-        $this->transitWasDoneOnSunday($transit);
+        $transit = $this->transit(20, $this->sunday());
+        $this->completeTransit($transit);
 
         //when
         $price = $transit->calculateFinalCosts();
@@ -96,9 +95,8 @@ class CalculateTransitPriceTest extends TestCase
     public function calculatePriceOnNewYearsEve(): void
     {
         //given
-        $transit = $this->transit(Transit::STATUS_COMPLETED, 20);
-        //and
-        $this->transitWasDoneOnNewYearsEve($transit);
+        $transit = $this->transit(20, $this->newYearsEve());
+        $this->completeTransit($transit);
 
         //when
         $price = $transit->calculateFinalCosts();
@@ -113,9 +111,8 @@ class CalculateTransitPriceTest extends TestCase
     public function calculatePriceOnSaturday(): void
     {
         //given
-        $transit = $this->transit(Transit::STATUS_COMPLETED, 20);
-        //and
-        $this->transitWasDoneOnSaturday($transit);
+        $transit = $this->transit(20, $this->saturday());
+        $this->completeTransit($transit);
 
         //when
         $price = $transit->calculateFinalCosts();
@@ -130,9 +127,8 @@ class CalculateTransitPriceTest extends TestCase
     public function calculatePriceOnSaturdayNight(): void
     {
         //given
-        $transit = $this->transit(Transit::STATUS_COMPLETED, 20);
-        //and
-        $this->transitWasDoneOnSaturdayNight($transit);
+        $transit = $this->transit(20, $this->saturdayNight());
+        $this->completeTransit($transit);
 
         //when
         $price = $transit->calculateFinalCosts();
@@ -141,43 +137,56 @@ class CalculateTransitPriceTest extends TestCase
         self::assertEquals(Money::from(6000), $price); //60.00
     }
 
-    private function transit(string $status, float $km): Transit
-    {
+    private function transit(
+        float $km,
+        ?\DateTimeImmutable $dateTime = null
+    ): Transit {
         $transit = new Transit(
             new Client(),
             new Address('Polska', 'Warszawa', 'Młynarska', 20),
             new Address('Polska', 'Warszawa', 'Zytnia', 20),
             CarType::CAR_CLASS_VAN,
-            new \DateTimeImmutable(),
+            $dateTime ?? new \DateTimeImmutable(),
             Distance::ofKm($km),
         );
         PrivateProperty::setId(1, $transit);
-        $transit->setStatus($status);
+
+        $driver = new Driver();
+        PrivateProperty::setId(1, $driver);
+
+        $transit->proposeDriver($driver);
+        $transit->accept($driver, new \DateTimeImmutable());
+
         return $transit;
     }
 
-    private function transitWasOnDoneOnFriday(Transit $transit): void
+    private function friday(): \DateTimeImmutable
     {
-        $transit->setDateTime(new \DateTimeImmutable('2021-04-16 08:30'));
+        return new \DateTimeImmutable('2021-04-16 08:30');
     }
 
-    private function transitWasDoneOnNewYearsEve(Transit $transit): void
+    private function newYearsEve(): \DateTimeImmutable
     {
-        $transit->setDateTime(new \DateTimeImmutable('2021-12-31 08:30'));
+        return new \DateTimeImmutable('2021-12-31 08:30');
     }
 
-    private function transitWasDoneOnSaturday(Transit $transit): void
+    private function saturday(): \DateTimeImmutable
     {
-        $transit->setDateTime(new \DateTimeImmutable('2021-04-17 08:30'));
+        return new \DateTimeImmutable('2021-04-17 08:30');
     }
 
-    private function transitWasDoneOnSunday(Transit $transit): void
+    private function sunday(): \DateTimeImmutable
     {
-        $transit->setDateTime(new \DateTimeImmutable('2021-04-18 08:30'));
+        return new \DateTimeImmutable('2021-04-18 08:30');
     }
 
-    private function transitWasDoneOnSaturdayNight(Transit $transit): void
+    private function saturdayNight(): \DateTimeImmutable
     {
-        $transit->setDateTime(new \DateTimeImmutable('2021-04-17 19:30'));
+        return new \DateTimeImmutable('2021-04-17 19:30');
+    }
+
+    private function completeTransit(Transit $transit): void
+    {
+        $transit->complete($transit->getTo(), $transit->getKm(), $transit->getDateTime());
     }
 }

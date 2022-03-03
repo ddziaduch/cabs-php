@@ -279,22 +279,6 @@ class Transit extends BaseEntity
         return $this->status;
     }
 
-    public function setStatus(string $status): void
-    {
-        if (!in_array($status, [
-            self::STATUS_IN_TRANSIT,
-            self::STATUS_TRANSIT_TO_PASSENGER,
-            self::STATUS_DRIVER_ASSIGNMENT_FAILED,
-            self::STATUS_CANCELLED,
-            self::STATUS_COMPLETED,
-            self::STATUS_WAITING_FOR_DRIVER_ASSIGNMENT,
-            self::STATUS_DRAFT,
-        ], true)) {
-            throw new \InvalidArgumentException('Invalid driver status value');
-        }
-        $this->status = $status;
-    }
-
     public function getDate(): ?\DateTimeImmutable
     {
         return $this->date;
@@ -359,12 +343,6 @@ class Transit extends BaseEntity
     public function getDateTime(): ?\DateTimeImmutable
     {
         return $this->dateTime;
-    }
-
-    public function setDateTime(?\DateTimeImmutable $dateTime): void
-    {
-        $this->tariff = Tariff::ofTime($dateTime);
-        $this->dateTime = $dateTime;
     }
 
     public function getPublished(): ?\DateTimeImmutable
