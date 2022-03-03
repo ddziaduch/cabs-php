@@ -137,6 +137,19 @@ class Transit extends BaseEntity
         $this->driversRejections = new ArrayCollection();
     }
 
+    public function complete(
+        Address $destinationAddress,
+        Distance $distance,
+        \DateTimeImmutable $completeAt,
+    ): void {
+        $this->to = $destinationAddress;
+        $this->km = $distance->toKmInFloat();
+        $this->estimateCost();
+        $this->status = self::STATUS_COMPLETED;
+        $this->calculateCost();
+        $this->completeAt = $completeAt;
+    }
+
     public function reject(Driver $driver): void
     {
         $this->driversRejections->add($driver);
@@ -297,11 +310,6 @@ class Transit extends BaseEntity
         return $this->to;
     }
 
-    public function setTo(Address $to): void
-    {
-        $this->to = $to;
-    }
-
     public function getAcceptedAt(): ?\DateTimeImmutable
     {
         return $this->acceptedAt;
@@ -419,11 +427,6 @@ class Transit extends BaseEntity
         return $this->completeAt;
     }
 
-    public function setCompleteAt(?\DateTimeImmutable $completeAt): void
-    {
-        $this->completeAt = $completeAt;
-    }
-
     public function getCarType(): ?string
     {
         return $this->carType;
@@ -452,5 +455,10 @@ class Transit extends BaseEntity
     public function isDriverRejected(Driver $driver): bool
     {
         return $this->driversRejections->contains($driver);
+    }
+
+    public function canBeCompleted(): bool
+    {
+        return $this->status === self::STATUS_IN_TRANSIT;
     }
 }

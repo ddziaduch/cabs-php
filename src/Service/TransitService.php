@@ -441,33 +441,34 @@ class TransitService
         $destinationAddress = $this->addressRepository->save($destinationAddress);
         $driver = $this->driverRepository->getOne($driverId);
 
-        if($driver === null) {
+        if ($driver === null) {
             throw new \InvalidArgumentException('Driver does not exist, id = '.$driverId);
         }
 
         $transit = $this->transitRepository->getOne($transitId);
 
-        if($transit === null) {
+        if ($transit === null) {
             throw new \InvalidArgumentException('Transit does not exist, id = '.$transitId);
         }
 
-        if($transit->getStatus() === Transit::STATUS_IN_TRANSIT) {
+        if ($transit->canBeCompleted()) {
             // FIXME later: add some exceptions handling
             $geoFrom = $this->geocodingService->geocodeAddress($transit->getFrom());
             $geoTo = $this->geocodingService->geocodeAddress($transit->getTo());
 
-            $transit->setTo($destinationAddress);
-            $transit->setKm(Distance::ofKm($this->distanceCalculator->calculateByMap($geoFrom[0], $geoFrom[1], $geoTo[0], $geoTo[1])));
-            $transit->setStatus(Transit::STATUS_COMPLETED);
-            $transit->calculateFinalCosts();
             $driver->setOccupied(false);
-            $transit->setCompleteAt($this->clock->now());
+            $distance = Distance::ofKm(
+                $this->distanceCalculator->calculateByMap($geoFrom[0], $geoFrom[1], $geoTo[0], $geoTo[1]),
+            );
+            $completeAt = $this->clock->now();
+            $transit->complete($destinationAddress, $distance, $completeAt);
             $driverFee = $this->driverFeeService->calculateDriverFee($transitId);
             $transit->setDriversFee($driverFee);
+
             $this->driverRepository->save($driver);
             $this->awardsService->registerMiles($transit->getClient()->getId(), $transitId);
             $this->transitRepository->save($transit);
-            $this->invoiceGenerator->generate($transit->getPrice()->toInt(), $transit->getClient()->getName() . ' ' . $transit->getClient()->getLastName());
+            $this->invoiceGenerator->generate($transit->getPrice()->toInt(), $transit->getClient()->getName().' '.$transit->getClient()->getLastName());
         } else {
             throw new \RuntimeException('Cannot complete Transit, id = '.$transitId);
         }
