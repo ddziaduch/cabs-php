@@ -187,6 +187,6 @@ class CalculateTransitPriceTest extends TestCase
 
     private function completeTransit(Transit $transit): void
     {
-        $transit->complete($transit->getTo(), $transit->getKm(), $transit->getDateTime());
+        $transit->complete($transit->getTo(), $transit->getKm(), new \DateTimeImmutable());
     }
 }

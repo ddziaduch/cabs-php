@@ -103,7 +103,7 @@ class Fixtures
             $this->anAddress('Polska', 'Warszawa', 'Młynarska', 20),
             $this->anAddress('Polska', 'Warszawa', 'Zytnia', 20),
         );
-        $transit->complete($transit->getTo(), $transit->getKm(), $transit->getDateTime());
+        $transit->complete($transit->getTo(), $transit->getKm(), new \DateTimeImmutable());
 
         return $this->transitRepository->save($transit);
     }
