@@ -112,7 +112,7 @@ class Fixtures
     {
         $carType = new CarType($carClass, 'opis', 1);
         PrivateProperty::setId(1, $carType);
-        $carTypeDTO = CarTypeDTO::new($carType);
+        $carTypeDTO = CarTypeDTO::new($carType, 0);
         $carType = $this->carTypeService->create($carTypeDTO);
         $this->carTypeService->registerCar($carClass);
         $this->carTypeService->activate($carType->getId());

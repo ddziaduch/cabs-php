@@ -3,55 +3,47 @@
 namespace LegacyFighter\Cabs\Repository;
 
 use Doctrine\ORM\EntityManagerInterface;
-use LegacyFighter\Cabs\Entity\CarType;
+use LegacyFighter\Cabs\Entity\CarTypeActiveCounter;
 
-class CarTypeActiveCarsCounterRepository
+class CarTypeActiveCounterRepository
 {
-    private EntityManagerInterface $em;
-
-    public function __construct(EntityManagerInterface $em)
+    public function __construct(private EntityManagerInterface $em)
     {
-        $this->em = $em;
     }
 
-    public function findByCarClass(string $carClass): ?CarType
+    public function findByCarClass(string $carClass): ?CarTypeActiveCounter
     {
-        return $this->em->getRepository(CarType::class)->findOneBy(['carClass' => $carClass]);
+        return $this->em->find(CarTypeActiveCounter::class, $carClass);
     }
 
-    public function save(CarType $carType): void
+    public function save(CarTypeActiveCounter $carTypeActiveCounter): void
     {
-        $this->em->persist($carType);
-        $this->em->flush();
-    }
-
-    public function delete(CarType $carType): void
-    {
-        $this->em->remove($carType);
-        $this->em->flush();
+        $this->em->persist($carTypeActiveCounter);
     }
 
     public function incrementCounter(string $carClass): void
     {
-        $this->em->getConnection()->executeQuery(
-            <<<'SQL'
-            UPDATE car_type_active_counter
-            SET counter = counter + 1
-            WHERE car_class = :carClass
-            SQL,
-            ['carClass' => $carClass],
-        );
+        $this->em->getConnection()->executeQuery('
+            UPDATE car_type_active_counter counter SET active_cars_counter = active_cars_counter + 1 
+            WHERE counter.car_class = :car_class', [
+            'car_class' => $carClass
+        ]);
+        $this->em->clear(CarTypeActiveCounter::class);
     }
 
     public function decrementCounter(string $carClass): void
     {
-        $this->em->getConnection()->executeQuery(
-            <<<'SQL'
-            UPDATE car_type_active_counter
-            SET counter = counter - 1
-            WHERE car_class = :carClass
-            SQL,
-            ['carClass' => $carClass],
-        );
+        $this->em->getConnection()->executeQuery('
+            UPDATE car_type_active_counter counter SET active_cars_counter = active_cars_counter - 1 
+            WHERE counter.car_class = :car_class', [
+            'car_class' => $carClass
+        ]);
+        $this->em->clear(CarTypeActiveCounter::class);
+    }
+
+    public function delete(CarTypeActiveCounter $carTypeActiveCounter): void
+    {
+        $this->em->remove($carTypeActiveCounter);
+        $this->em->flush();
     }
 }

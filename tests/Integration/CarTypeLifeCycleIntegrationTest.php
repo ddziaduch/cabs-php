@@ -16,16 +16,16 @@ class CarTypeLifeCycleIntegrationTest extends KernelTestCase
     {
         $givenCarTypeDto = $this->aCarTypeDto('the vans');
         $carTypeService = $this->aCarTypeService();
-        $actualCarType = $carTypeService->load(
+        $actualCarTypeDto = $carTypeService->loadDto(
             $carTypeService->create($givenCarTypeDto)->getId(),
         );
 
-        self::assertSame($givenCarTypeDto->getStatus(), $actualCarType->getStatus());
-        self::assertSame($givenCarTypeDto->getCarClass(), $actualCarType->getCarClass());
-        self::assertSame($givenCarTypeDto->getActiveCarsCounter(), $actualCarType->getActiveCarsCounter());
-        self::assertSame($givenCarTypeDto->getCarsCounter(), $actualCarType->getCarsCounter());
-        self::assertSame($givenCarTypeDto->getDescription(), $actualCarType->getDescription());
-        self::assertSame($givenCarTypeDto->getMinNoOfCarsToActivateClass(), $actualCarType->getMinNoOfCarsToActivateClass());
+        self::assertSame($givenCarTypeDto->getStatus(), $actualCarTypeDto->getStatus());
+        self::assertSame($givenCarTypeDto->getCarClass(), $actualCarTypeDto->getCarClass());
+        self::assertSame($givenCarTypeDto->getActiveCarsCounter(), $actualCarTypeDto->getActiveCarsCounter());
+        self::assertSame($givenCarTypeDto->getCarsCounter(), $actualCarTypeDto->getCarsCounter());
+        self::assertSame($givenCarTypeDto->getDescription(), $actualCarTypeDto->getDescription());
+        self::assertSame($givenCarTypeDto->getMinNoOfCarsToActivateClass(), $actualCarTypeDto->getMinNoOfCarsToActivateClass());
     }
 
     public function testCanChangeDescription(): void
@@ -33,23 +33,23 @@ class CarTypeLifeCycleIntegrationTest extends KernelTestCase
         $givenCarTypeDto1 = $this->aCarTypeDto('the vans');
         $carTypeService = $this->aCarTypeService();
         $carTypeService->create($givenCarTypeDto1);
-        $actualCarType1 = $carTypeService->load(
+        $actualCarTypeDto1 = $carTypeService->loadDto(
             $carTypeService->create($givenCarTypeDto1)->getId(),
         );
         $givenCarTypeDto2 = $this->aCarTypeDto('the super vans');
         $carTypeService->create($givenCarTypeDto2);
-        $actualCarType2 = $carTypeService->load(
+        $actualCarTypeDto2 = $carTypeService->loadDto(
             $carTypeService->create($givenCarTypeDto2)->getId(),
         );
 
-        self::assertSame($actualCarType1->getId(), $actualCarType2->getId());
-        self::assertSame('the super vans', $actualCarType2->getDescription());
+        self::assertSame($actualCarTypeDto1->getId(), $actualCarTypeDto2->getId());
+        self::assertSame('the super vans', $actualCarTypeDto2->getDescription());
 
-        self::assertSame($givenCarTypeDto1->getStatus(), $actualCarType2->getStatus());
-        self::assertSame($givenCarTypeDto1->getCarClass(), $actualCarType2->getCarClass());
-        self::assertSame($givenCarTypeDto1->getActiveCarsCounter(), $actualCarType2->getActiveCarsCounter());
-        self::assertSame($givenCarTypeDto1->getCarsCounter(), $actualCarType2->getCarsCounter());
-        self::assertSame($givenCarTypeDto1->getMinNoOfCarsToActivateClass(), $actualCarType2->getMinNoOfCarsToActivateClass());
+        self::assertSame($givenCarTypeDto1->getStatus(), $actualCarTypeDto2->getStatus());
+        self::assertSame($givenCarTypeDto1->getCarClass(), $actualCarTypeDto2->getCarClass());
+        self::assertSame($givenCarTypeDto1->getActiveCarsCounter(), $actualCarTypeDto2->getActiveCarsCounter());
+        self::assertSame($givenCarTypeDto1->getCarsCounter(), $actualCarTypeDto2->getCarsCounter());
+        self::assertSame($givenCarTypeDto1->getMinNoOfCarsToActivateClass(), $actualCarTypeDto2->getMinNoOfCarsToActivateClass());
     }
 
     public function testCanRegisterCar(): void
@@ -58,9 +58,9 @@ class CarTypeLifeCycleIntegrationTest extends KernelTestCase
         $carTypeService = $this->aCarTypeService();
         $id = $carTypeService->create($givenCarTypeDto)->getId();
         $carTypeService->registerCar($givenCarTypeDto->getCarClass());
-        $carType = $carTypeService->load($id);
-        self::assertSame(1, $carType->getCarsCounter());
-        self::assertSame(0, $carType->getActiveCarsCounter());
+        $carTypeDto = $carTypeService->loadDto($id);
+        self::assertSame(1, $carTypeDto->getCarsCounter());
+        self::assertSame(0, $carTypeDto->getActiveCarsCounter());
     }
 
     public function testCanRegisterActiveCar(): void
@@ -69,9 +69,9 @@ class CarTypeLifeCycleIntegrationTest extends KernelTestCase
         $carTypeService = $this->aCarTypeService();
         $id = $carTypeService->create($givenCarTypeDto)->getId();
         $carTypeService->registerActiveCar($givenCarTypeDto->getCarClass());
-        $carType = $carTypeService->load($id);
-        self::assertSame(0, $carType->getCarsCounter());
-        self::assertSame(1, $carType->getActiveCarsCounter());
+        $carTypeDto = $carTypeService->loadDto($id);
+        self::assertSame(0, $carTypeDto->getCarsCounter());
+        self::assertSame(1, $carTypeDto->getActiveCarsCounter());
     }
 
     public function testCanUnregisterCar(): void
@@ -83,9 +83,9 @@ class CarTypeLifeCycleIntegrationTest extends KernelTestCase
         $carTypeService->registerCar($givenCarTypeDto->getCarClass());
         $carTypeService->registerCar($givenCarTypeDto->getCarClass());
         $carTypeService->unregisterCar($givenCarTypeDto->getCarClass());
-        $carType = $carTypeService->load($id);
-        self::assertSame(2, $carType->getCarsCounter());
-        self::assertSame(0, $carType->getActiveCarsCounter());
+        $carTypeDto = $carTypeService->loadDto($id);
+        self::assertSame(2, $carTypeDto->getCarsCounter());
+        self::assertSame(0, $carTypeDto->getActiveCarsCounter());
     }
 
     public function testCanUnregisterActiveCar(): void
@@ -97,9 +97,9 @@ class CarTypeLifeCycleIntegrationTest extends KernelTestCase
         $carTypeService->registerActiveCar($givenCarTypeDto->getCarClass());
         $carTypeService->registerActiveCar($givenCarTypeDto->getCarClass());
         $carTypeService->unregisterActiveCar($givenCarTypeDto->getCarClass());
-        $carType = $carTypeService->load($id);
-        self::assertSame(0, $carType->getCarsCounter());
-        self::assertSame(2, $carType->getActiveCarsCounter());
+        $carTypeDto = $carTypeService->loadDto($id);
+        self::assertSame(0, $carTypeDto->getCarsCounter());
+        self::assertSame(2, $carTypeDto->getActiveCarsCounter());
     }
 
     public function testCanBeActivated(): void
@@ -109,8 +109,8 @@ class CarTypeLifeCycleIntegrationTest extends KernelTestCase
         $id = $carTypeService->create($givenCarTypeDto)->getId();
         $carTypeService->registerCar($givenCarTypeDto->getCarClass());
         $carTypeService->activate($id);
-        $carType = $carTypeService->load($id);
-        self::assertSame(CarType::STATUS_ACTIVE, $carType->getStatus());
+        $carTypeDto = $carTypeService->loadDto($id);
+        self::assertSame(CarType::STATUS_ACTIVE, $carTypeDto->getStatus());
     }
 
     public function testCanNotBeActivatedIfNoMinRequiredCarsMeet(): void
@@ -130,8 +130,8 @@ class CarTypeLifeCycleIntegrationTest extends KernelTestCase
         $carTypeService->registerCar($givenCarTypeDto->getCarClass());
         $carTypeService->activate($id);
         $carTypeService->deactivate($id);
-        $carType = $carTypeService->load($id);
-        self::assertSame(CarType::STATUS_INACTIVE, $carType->getStatus());
+        $carTypeDto = $carTypeService->loadDto($id);
+        self::assertSame(CarType::STATUS_INACTIVE, $carTypeDto->getStatus());
     }
 
     private function aCarTypeDto(string $description): CarTypeDTO
@@ -141,7 +141,7 @@ class CarTypeLifeCycleIntegrationTest extends KernelTestCase
         );
         PrivateProperty::setId(1, $givenCarType);
 
-        return CarTypeDTO::new($givenCarType);
+        return CarTypeDTO::new($givenCarType, 0);
     }
 
     private function aCarTypeService(): CarTypeService

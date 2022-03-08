@@ -4,16 +4,22 @@ namespace LegacyFighter\Cabs\Entity;
 
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
-use LegacyFighter\Cabs\Common\BaseEntity;
+use Doctrine\ORM\Mapping\Id;
 
 #[Entity]
-class CarTypeActiveCarsCounter extends BaseEntity
+class CarTypeActiveCounter
 {
+    #[Id]
     #[Column]
     private string $carClass;
 
     #[Column(type: 'integer')]
     private int $activeCarsCounter = 0;
+
+    public function __construct(string $carClass)
+    {
+        $this->carClass = $carClass;
+    }
 
     public function getActiveCarsCounter(): int
     {
