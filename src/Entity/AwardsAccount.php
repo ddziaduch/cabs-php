@@ -162,4 +162,9 @@ class AwardsAccount extends BaseEntity
     {
         return $this->transactions;
     }
+
+    public function getMiles(): array
+    {
+        return $this->miles->toArray();
+    }
 }
