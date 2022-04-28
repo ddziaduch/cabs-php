@@ -218,7 +218,6 @@ class ContractLifecycleIntegrationTest extends KernelTestCase
     /** @test */
     public function canProposeAttachmentEvenIfContractIsAlreadyAccepted(): void
     {
-        // TODO: fix me, this is clearly a bug!
         //given
         $contract = $this->createContract('partnerName', 'umowa o cenę');
         //and
@@ -228,16 +227,10 @@ class ContractLifecycleIntegrationTest extends KernelTestCase
         $this->acceptAttachment($attachment);
         //and
         $this->acceptContract($contract);
+        //then
+        $this->expectException(\RuntimeException::class);
         //when
         $this->addAttachmentToContract($contract, 'content2');
-
-        //then
-        $loaded = $this->loadContract($contract->getId());
-        self::assertEquals(Contract::STATUS_ACCEPTED, $loaded->getStatus());
-        //and
-        $this->expectException(\RuntimeException::class);
-        //and
-        $this->acceptContract($contract);
     }
 
     private function loadContract(int $id): ContractDTO
