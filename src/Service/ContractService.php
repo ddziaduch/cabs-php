@@ -80,6 +80,11 @@ class ContractService
     public function proposeAttachment(int $contractId, ContractAttachmentDTO $contractAttachmentDTO): ContractAttachmentDTO
     {
         $contract = $this->find($contractId);
+
+        if ($contract->getStatus() !== Contract::STATUS_NEGOTIATIONS_IN_PROGRESS) {
+            throw new \RuntimeException('Contract must be still in negotiation in order to propose attachment');
+        }
+
         $contractAttachment = new ContractAttachment();
         $contractAttachment->setContract($contract);
         $contractAttachment->setData($contractAttachmentDTO->getData());
