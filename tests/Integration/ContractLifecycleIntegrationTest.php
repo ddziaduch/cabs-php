@@ -240,9 +240,12 @@ class ContractLifecycleIntegrationTest extends KernelTestCase
 
     private function createContract(string $partnerName, string $subject): ContractDTO
     {
-        $dto = ContractDTO::with($partnerName, $subject);
-        $contract = $this->contractService->createContract($dto);
-        return $this->loadContract($contract->getId());
+        $id = $this->contractService->createContract(
+            $partnerName,
+            $subject,
+        );
+
+        return $this->loadContract($id);
     }
 
     private function addAttachmentToContract(ContractDTO $created, string $content): ContractAttachmentDTO

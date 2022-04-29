@@ -20,14 +20,15 @@ class ContractService
         $this->contractAttachmentRepository = $contractAttachmentRepository;
     }
 
-    public function createContract(ContractDTO $contractDTO): Contract
-    {
-        $contract = new Contract();
-        $contract->setPartnerName($contractDTO->getPartnerName());
-        $partnerContractsCount = count($this->contractRepository->findByPartnerName($contractDTO->getPartnerName())) + 1;
-        $contract->setSubject($contractDTO->getSubject());
-        $contract->setContractNo(sprintf('C/%s/%s', $partnerContractsCount, $contractDTO->getPartnerName()));
-        return $this->contractRepository->save($contract);
+    public function createContract(
+        string $partnerName,
+        string $subject,
+    ): int {
+        $partnerContractsCount = count($this->contractRepository->findByPartnerName($partnerName)) + 1;
+
+        $contract = new Contract($partnerName, $subject, $partnerContractsCount);
+
+        return $this->contractRepository->save($contract)->getId();
     }
 
     public function acceptContract(int $id): void
@@ -63,10 +64,11 @@ class ContractService
         }
     }
 
-    public function find(int $id): Contract
+    private function find(int $id): Contract
     {
         $contract = $this->contractRepository->getOne($id);
-        if($contract===null) {
+
+        if ($contract === null) {
             throw new \InvalidArgumentException('Contract does not exist');
         }
         return $contract;

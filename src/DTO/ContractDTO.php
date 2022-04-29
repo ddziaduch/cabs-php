@@ -43,14 +43,6 @@ class ContractDTO implements \JsonSerializable
         return $instance;
     }
 
-    public static function with(string $partnerName, string $subject): self
-    {
-        $instance = new self();
-        $instance->partnerName = $partnerName;
-        $instance->subject = $subject;
-        return $instance;
-    }
-
     public function getId(): int
     {
         return $this->id;

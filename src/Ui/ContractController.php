@@ -16,8 +16,12 @@ class ContractController
     #[Route('/contracts', methods: ['POST'])]
     public function create(ContractDTO $contractDTO): Response
     {
-        $created = $this->contractService->createContract($contractDTO);
-        return new JsonResponse(ContractDTO::from($created));
+        $id = $this->contractService->createContract(
+            $contractDTO->getPartnerName(),
+            $contractDTO->getSubject(),
+        );
+
+        return new JsonResponse($this->contractService->findDto($id));
     }
 
     #[Route('/contracts/{id}', methods: ['GET'])]

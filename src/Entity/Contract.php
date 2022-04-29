@@ -46,11 +46,17 @@ class Contract extends BaseEntity
     #[Column]
     private string $contractNo;
 
-    public function __construct()
-    {
-        $this->creationDate = new \DateTimeImmutable();
+    public function __construct(
+        string $partnerName,
+        string $subject,
+        int $partnerContractsCount,
+    ) {
         $this->attachments = new ArrayCollection();
         $this->creationDate = new \DateTimeImmutable();
+
+        $this->partnerName = $partnerName;
+        $this->subject = $subject;
+        $this->contractNo = sprintf('C/%s/%s', $partnerContractsCount, $partnerName);
     }
 
     public function getAttachments(): array
@@ -68,19 +74,9 @@ class Contract extends BaseEntity
         return $this->partnerName;
     }
 
-    public function setPartnerName(string $partnerName): void
-    {
-        $this->partnerName = $partnerName;
-    }
-
     public function getSubject(): string
     {
         return $this->subject;
-    }
-
-    public function setSubject(string $subject): void
-    {
-        $this->subject = $subject;
     }
 
     public function getCreationDate(): \DateTimeImmutable
@@ -136,10 +132,5 @@ class Contract extends BaseEntity
     public function getContractNo(): string
     {
         return $this->contractNo;
-    }
-
-    public function setContractNo(string $contractNo): void
-    {
-        $this->contractNo = $contractNo;
     }
 }
