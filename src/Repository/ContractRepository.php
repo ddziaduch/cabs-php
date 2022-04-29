@@ -26,6 +26,12 @@ class ContractRepository
 
     public function getOne(int $id): ?Contract
     {
-        return $this->em->find(Contract::class, $id);
+        $contract = $this->em->find(Contract::class, $id);
+
+        if ($contract === null) {
+            throw new \InvalidArgumentException('Contract does not exist');
+        }
+
+        return $contract;
     }
 }

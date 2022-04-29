@@ -250,8 +250,7 @@ class ContractLifecycleIntegrationTest extends KernelTestCase
 
     private function addAttachmentToContract(ContractDTO $created, string $content): ContractAttachmentDTO
     {
-        $contractAttachment = ContractAttachmentDTO::with($content);
-        return $this->contractService->proposeAttachment($created->getId(), $contractAttachment);
+        return $this->contractService->proposeAttachment($created->getId(), $content);
     }
 
     private function removeAttachmentFromContract(ContractDTO $contract, ContractAttachmentDTO $attachment): void

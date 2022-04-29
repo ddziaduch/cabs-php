@@ -64,11 +64,6 @@ class Contract extends BaseEntity
         return $this->attachments->toArray();
     }
 
-    public function setAttachments(array $attachments): void
-    {
-        $this->attachments = new ArrayCollection($attachments);
-    }
-
     public function getPartnerName(): string
     {
         return $this->partnerName;
@@ -84,19 +79,9 @@ class Contract extends BaseEntity
         return $this->creationDate;
     }
 
-    public function setCreationDate(\DateTimeImmutable $creationDate): void
-    {
-        $this->creationDate = $creationDate;
-    }
-
     public function getAcceptedAt(): ?\DateTimeImmutable
     {
         return $this->acceptedAt;
-    }
-
-    public function setAcceptedAt(?\DateTimeImmutable $acceptedAt): void
-    {
-        $this->acceptedAt = $acceptedAt;
     }
 
     public function getRejectedAt(): ?\DateTimeImmutable
@@ -104,19 +89,9 @@ class Contract extends BaseEntity
         return $this->rejectedAt;
     }
 
-    public function setRejectedAt(?\DateTimeImmutable $rejectedAt): void
-    {
-        $this->rejectedAt = $rejectedAt;
-    }
-
     public function getChangeDate(): ?\DateTimeImmutable
     {
         return $this->changeDate;
-    }
-
-    public function setChangeDate(?\DateTimeImmutable $changeDate): void
-    {
-        $this->changeDate = $changeDate;
     }
 
     public function getStatus(): string
@@ -124,13 +99,37 @@ class Contract extends BaseEntity
         return $this->status;
     }
 
-    public function setStatus(string $status): void
-    {
-        $this->status = $status;
-    }
-
     public function getContractNo(): string
     {
         return $this->contractNo;
+    }
+
+    public function accept(): void
+    {
+        foreach ($this->attachments as $attachment) {
+            if ($attachment->getStatus() !== ContractAttachment::STATUS_ACCEPTED_BY_BOTH_SIDES) {
+                throw new \RuntimeException('Not all attachments accepted by both sides');
+            }
+        }
+
+        $this->status = self::STATUS_ACCEPTED;
+    }
+
+    public function reject(): void
+    {
+        $this->status = self::STATUS_REJECTED;
+    }
+
+    public function proposeAttachment(string $data): ContractAttachment
+    {
+        if ($this->status !== self::STATUS_NEGOTIATIONS_IN_PROGRESS) {
+            throw new \RuntimeException('Contract must be still in negotiation in order to propose attachment');
+        }
+
+        $attachment = new ContractAttachment($this, $data);
+
+        $this->attachments->add($attachment);
+
+        return $attachment;
     }
 }

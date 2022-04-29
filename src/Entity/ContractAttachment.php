@@ -4,7 +4,6 @@ namespace LegacyFighter\Cabs\Entity;
 
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
-use Doctrine\ORM\Mapping\ManyToMany;
 use Doctrine\ORM\Mapping\ManyToOne;
 use LegacyFighter\Cabs\Common\BaseEntity;
 
@@ -37,9 +36,11 @@ class ContractAttachment extends BaseEntity
     #[ManyToOne(targetEntity: Contract::class)]
     private Contract $contract;
 
-    public function __construct()
+    public function __construct(Contract $contract, string $data)
     {
         $this->creationDate = new \DateTimeImmutable();
+        $this->contract = $contract;
+        $this->data = $data;
     }
 
     public function getData(): string
@@ -47,19 +48,9 @@ class ContractAttachment extends BaseEntity
         return $this->data;
     }
 
-    public function setData(string $data): void
-    {
-        $this->data = $data;
-    }
-
     public function getCreationDate(): \DateTimeImmutable
     {
         return $this->creationDate;
-    }
-
-    public function setCreationDate(\DateTimeImmutable $creationDate): void
-    {
-        $this->creationDate = $creationDate;
     }
 
     public function getAcceptedAt(): ?\DateTimeImmutable
@@ -67,19 +58,9 @@ class ContractAttachment extends BaseEntity
         return $this->acceptedAt;
     }
 
-    public function setAcceptedAt(?\DateTimeImmutable $acceptedAt): void
-    {
-        $this->acceptedAt = $acceptedAt;
-    }
-
     public function getRejectedAt(): ?\DateTimeImmutable
     {
         return $this->rejectedAt;
-    }
-
-    public function setRejectedAt(?\DateTimeImmutable $rejectedAt): void
-    {
-        $this->rejectedAt = $rejectedAt;
     }
 
     public function getChangeDate(): ?\DateTimeImmutable
@@ -87,22 +68,9 @@ class ContractAttachment extends BaseEntity
         return $this->changeDate;
     }
 
-    public function setChangeDate(?\DateTimeImmutable $changeDate): void
-    {
-        $this->changeDate = $changeDate;
-    }
-
     public function getStatus(): string
     {
         return $this->status;
-    }
-
-    public function setStatus(string $status): void
-    {
-        if(!in_array($status, [self::STATUS_REJECTED, self::STATUS_PROPOSED, self::STATUS_ACCEPTED_BY_BOTH_SIDES, self::STATUS_ACCEPTED_BY_ONE_SIDE], true)) {
-            throw new \InvalidArgumentException('Invalid status provided');
-        }
-        $this->status = $status;
     }
 
     public function getContract(): Contract
@@ -110,8 +78,17 @@ class ContractAttachment extends BaseEntity
         return $this->contract;
     }
 
-    public function setContract(Contract $contract): void
+    public function reject(): void
     {
-        $this->contract = $contract;
+        $this->status = self::STATUS_REJECTED;
+    }
+
+    public function accept(): void
+    {
+        if (in_array($this->status, [self::STATUS_ACCEPTED_BY_ONE_SIDE, self::STATUS_ACCEPTED_BY_BOTH_SIDES], true)) {
+            $this->status = self::STATUS_ACCEPTED_BY_BOTH_SIDES;
+        } else {
+            $this->status = self::STATUS_ACCEPTED_BY_ONE_SIDE;
+        }
     }
 }

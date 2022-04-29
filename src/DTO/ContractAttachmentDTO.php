@@ -34,13 +34,6 @@ class ContractAttachmentDTO implements \JsonSerializable
         return $instance;
     }
 
-    public static function with(string $data): self
-    {
-        $instance = new self();
-        $instance->data = $data;
-        return $instance;
-    }
-
     public function getId(): int
     {
         return $this->id;

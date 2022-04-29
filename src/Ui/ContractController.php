@@ -34,7 +34,7 @@ class ContractController
     #[Route('/contracts/{id}/attachment', methods: ['POST'])]
     public function proposeAttachment(int $id, ContractAttachmentDTO $contractAttachmentDTO): Response
     {
-        $dto = $this->contractService->proposeAttachment($id, $contractAttachmentDTO);
+        $dto = $this->contractService->proposeAttachment($id, $contractAttachmentDTO->getData());
         return new JsonResponse($dto);
     }
 
