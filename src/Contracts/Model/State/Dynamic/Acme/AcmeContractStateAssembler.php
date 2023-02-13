@@ -2,7 +2,6 @@
 
 namespace LegacyFighter\Cabs\Contracts\Model\State\Dynamic\Acme;
 
-use LegacyFighter\Cabs\Contracts\Model\State\Dynamic\ChangeCommand;
 use LegacyFighter\Cabs\Contracts\Model\State\Dynamic\Config\Actions\ChangeVerifier;
 use LegacyFighter\Cabs\Contracts\Model\State\Dynamic\Config\Actions\PublishEvent;
 use LegacyFighter\Cabs\Contracts\Model\State\Dynamic\Config\Events\DocumentPublished;

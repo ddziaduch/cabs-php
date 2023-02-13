@@ -15,8 +15,11 @@ class DocumentHeader extends BaseEntity
     private ?string $stateDescriptor = null;
     private ?ContentId $contentId = null;
 
-    public function __construct(int $authorId, DocumentNumber $number)
-    {
+    public function __construct(
+        int $authorId,
+        DocumentNumber $number,
+        private ?int $price = null,
+    ) {
         $this->authorId = $authorId;
         $this->number = $number;
     }
@@ -69,5 +72,10 @@ class DocumentHeader extends BaseEntity
     public function getContentId(): ?ContentId
     {
         return $this->contentId;
+    }
+
+    public function getPrice(): int
+    {
+        return $this->price;
     }
 }
